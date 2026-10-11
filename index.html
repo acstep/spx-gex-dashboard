@@ -5,12 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SPX / ES 三層複合 GEX 實戰量化儀表板</title>
 <style>
+  /* Default Dark Theme */
   :root {
     --bg-main: #0b0f19;
     --bg-card: #131a2a;
+    --bg-card-sub: rgba(255,255,255,0.025);
     --bg-card-hover: #1a2438;
     --border: #26334d;
     --text-main: #e2e8f0;
+    --text-title: #ffffff;
     --text-muted: #94a3b8;
     --pos-green: #10b981;
     --pos-green-bg: rgba(16, 185, 129, 0.15);
@@ -20,16 +23,50 @@
     --pin-gold-bg: rgba(245, 158, 11, 0.15);
     --iv-cyan: #06b6d4;
     --accent-blue: #3b82f6;
+    --barchart-pos: #2563eb;
+    --barchart-neg: #f59e0b;
+    --barchart-agg: #38bdf8;
+    --barchart-bg-pos: rgba(16, 185, 129, 0.06);
+    --barchart-grid: rgba(148, 163, 184, 0.16);
+    --input-bg: #0b0f19;
   }
+
+  /* Light Theme (Barchart Crisp White Style) */
+  body.light-theme {
+    --bg-main: #f4f6f9;
+    --bg-card: #ffffff;
+    --bg-card-sub: #f8fafc;
+    --bg-card-hover: #f1f5f9;
+    --border: #dce3ec;
+    --text-main: #1e293b;
+    --text-title: #0f172a;
+    --text-muted: #64748b;
+    --pos-green: #059669;
+    --pos-green-bg: rgba(5, 150, 105, 0.12);
+    --neg-red: #e11d48;
+    --neg-red-bg: rgba(225, 29, 72, 0.10);
+    --pin-gold: #d97706;
+    --pin-gold-bg: rgba(217, 119, 6, 0.12);
+    --iv-cyan: #0891b2;
+    --accent-blue: #1d4ed8;
+    --barchart-pos: #001aff;
+    --barchart-neg: #f59e0b;
+    --barchart-agg: #3b9eff;
+    --barchart-bg-pos: rgba(220, 252, 231, 0.55);
+    --barchart-grid: #e2e8f0;
+    --input-bg: #ffffff;
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     background-color: var(--bg-main);
     color: var(--text-main);
     line-height: 1.6;
-    padding: 20px;
+    padding: 18px;
+    transition: background-color 0.2s, color 0.2s;
   }
-  .container { max-width: 1380px; margin: 0 auto; }
+  .container { max-width: 1420px; margin: 0 auto; }
   
   /* Header */
   .header {
@@ -40,14 +77,15 @@
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 16px 22px;
-    margin-bottom: 18px;
+    padding: 14px 20px;
+    margin-bottom: 16px;
     gap: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
   .title-block h1 {
     font-size: 20px;
-    font-weight: 700;
-    color: #fff;
+    font-weight: 800;
+    color: var(--text-title);
     display: flex;
     align-items: center;
     gap: 10px;
@@ -55,37 +93,52 @@
   .title-block p {
     font-size: 12px;
     color: var(--text-muted);
-    margin-top: 4px;
+    margin-top: 3px;
   }
   .header-metrics {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
   }
   .metric-pill {
-    background: rgba(255,255,255,0.03);
+    background: var(--bg-card-sub);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 7px 14px;
+    padding: 6px 12px;
     text-align: right;
   }
   .metric-pill .label { font-size: 11px; color: var(--text-muted); }
-  .metric-pill .val { font-size: 18px; font-weight: 700; font-family: monospace; color: #fff; }
+  .metric-pill .val { font-size: 17px; font-weight: 700; font-family: monospace; color: var(--text-title); }
   .basis-input {
-    width: 70px;
-    background: #0b0f19;
+    width: 68px;
+    background: var(--input-bg);
     border: 1px solid var(--accent-blue);
-    color: #fff;
+    color: var(--text-title);
     font-family: monospace;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
     padding: 2px 6px;
     border-radius: 4px;
     text-align: center;
   }
+  .theme-btn {
+    background: var(--bg-card-sub);
+    border: 1px solid var(--border);
+    color: var(--text-title);
+    padding: 8px 13px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .theme-btn:hover { border-color: var(--accent-blue); }
   .regime-badge {
-    padding: 9px 15px;
+    padding: 8px 14px;
     border-radius: 8px;
     font-weight: 700;
     font-size: 13px;
@@ -97,16 +150,17 @@
   .levels-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
-    gap: 14px;
-    margin-bottom: 18px;
+    gap: 12px;
+    margin-bottom: 16px;
   }
   .level-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 14px 16px;
+    padding: 13px 15px;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
   }
   .level-card::before {
     content: "";
@@ -118,32 +172,108 @@
   .card-call::before { background: var(--pos-green); }
   .card-put::before { background: var(--neg-red); }
   .card-support::before { background: var(--iv-cyan); }
-  .card-pin::before { background: #a855f7; }
+  .card-pin::before { background: #9333ea; }
 
-  .level-card .tag { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+  .level-card .tag { font-size: 11px; color: var(--text-muted); font-weight: 700; }
   .level-card .main-strike {
-    font-size: 24px;
+    font-size: 23px;
     font-weight: 800;
     font-family: monospace;
-    margin: 4px 0;
+    color: var(--text-title);
+    margin: 3px 0;
     display: flex;
     align-items: baseline;
     gap: 8px;
   }
   .level-card .es-sub {
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--pin-gold);
-    background: rgba(245, 158, 11, 0.12);
+    background: var(--pin-gold-bg);
     padding: 2px 7px;
     border-radius: 4px;
   }
   .level-card .desc { font-size: 12px; color: var(--text-muted); }
 
-  /* Main Layout */
+  /* Barchart Full-Width Visual Panel */
+  .barchart-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .barchart-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .barchart-title-area {
+    text-align: center;
+    flex: 1;
+  }
+  .barchart-title-area h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-title);
+  }
+  .barchart-legend {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    margin: 8px 0 12px;
+    color: var(--text-main);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 600;
+  }
+  .legend-item.disabled {
+    opacity: 0.4;
+    text-decoration: line-through;
+  }
+  .dot-blue { width: 11px; height: 11px; border-radius: 50%; background: var(--barchart-pos); display: inline-block; }
+  .dot-orange { width: 11px; height: 11px; border-radius: 50%; background: var(--barchart-neg); display: inline-block; }
+  .line-agg { width: 18px; height: 3px; background: var(--barchart-agg); display: inline-block; }
+  .line-put { width: 16px; height: 2px; background: #ef4444; display: inline-block; }
+  .line-call { width: 16px; height: 2px; background: #10b981; display: inline-block; }
+
+  .svg-chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 370px;
+  }
+  .chart-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(15, 23, 42, 0.95);
+    color: #f8fafc;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-family: monospace;
+    z-index: 50;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    min-width: 210px;
+  }
+
+  /* Main Layout Below Barchart */
   .main-grid {
     display: grid;
-    grid-template-columns: 1.35fr 1.15fr;
+    grid-template-columns: 1.25fr 1.25fr;
     gap: 18px;
     margin-bottom: 18px;
   }
@@ -155,21 +285,22 @@
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   }
   .panel-header {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     gap: 8px;
     border-bottom: 1px solid var(--border);
     padding-bottom: 10px;
   }
-  .panel-title { font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+  .panel-title { font-size: 15px; font-weight: 700; color: var(--text-title); display: flex; align-items: center; gap: 8px; }
   .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
   .tab-btn {
-    background: #0b0f19;
+    background: var(--bg-card-sub);
     border: 1px solid var(--border);
     color: var(--text-muted);
     padding: 6px 11px;
@@ -185,12 +316,12 @@
     color: #fff;
   }
 
-  /* Bar Chart Rows */
+  /* Ladder Bar Chart Rows */
   .chart-rows {
     display: flex;
     flex-direction: column;
     gap: 3px;
-    max-height: 720px;
+    max-height: 620px;
     overflow-y: auto;
     padding-right: 4px;
   }
@@ -206,19 +337,20 @@
   }
   .strike-row:hover { background: var(--bg-card-hover); }
   .strike-row.spot-row {
-    background: rgba(59, 130, 246, 0.2);
+    background: rgba(59, 130, 246, 0.15);
     border: 1px dashed var(--accent-blue);
   }
   .strike-label {
     display: flex;
     justify-content: space-between;
     font-weight: 700;
+    color: var(--text-title);
   }
   .strike-label .es-val { color: var(--text-muted); font-weight: 400; font-size: 11px; }
   .bar-track {
     position: relative;
-    height: 17px;
-    background: rgba(255,255,255,0.03);
+    height: 16px;
+    background: var(--bg-card-sub);
     border-radius: 3px;
     overflow: hidden;
     display: flex;
@@ -230,19 +362,19 @@
     top: 0;
     bottom: 0;
     width: 1px;
-    background: rgba(255,255,255,0.25);
+    background: var(--border);
     z-index: 2;
   }
   .bar-fill {
-    height: 13px;
+    height: 12px;
     border-radius: 2px;
     transition: width 0.25s;
   }
-  .val-col { text-align: right; font-weight: 600; }
-  .iv-col { text-align: right; color: var(--iv-cyan); }
+  .val-col { text-align: right; font-weight: 700; }
+  .iv-col { text-align: right; color: var(--iv-cyan); font-weight: 600; }
   .iv-low-badge {
-    background: rgba(6, 182, 212, 0.2);
-    color: #22d3ee;
+    background: rgba(6, 182, 212, 0.18);
+    color: var(--iv-cyan);
     padding: 0 4px;
     border-radius: 3px;
     font-weight: 700;
@@ -252,18 +384,18 @@
   .analysis-box {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
   }
   .diag-card {
-    background: rgba(255,255,255,0.025);
+    background: var(--bg-card-sub);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 15px 16px;
+    padding: 14px 16px;
   }
   .diag-card h3 {
     font-size: 14px;
-    margin-bottom: 10px;
-    color: #fff;
+    margin-bottom: 8px;
+    color: var(--text-title);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -271,7 +403,7 @@
   .diag-card p, .diag-card li {
     font-size: 13px;
     color: var(--text-main);
-    margin-bottom: 7px;
+    margin-bottom: 6px;
   }
   .diag-card ul { padding-left: 18px; }
   .highlight-green { color: var(--pos-green); font-weight: 700; }
@@ -281,6 +413,7 @@
 
   .footer-bar {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     font-size: 12px;
@@ -289,12 +422,13 @@
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 10px;
+    gap: 10px;
   }
-  .footer-bar a { color: #60a5fa; text-decoration: none; font-weight: 600; }
+  .footer-bar a { color: var(--accent-blue); text-decoration: none; font-weight: 700; }
   .footer-bar a:hover { text-decoration: underline; }
 </style>
 </head>
-<body>
+<body class="light-theme" id="app-body">
 <div class="container">
   <!-- Top Header -->
   <div class="header">
@@ -303,8 +437,11 @@
       <p>結合【昨日留倉 OI】＋【今日 0DTE 即時 Volume vGEX】＋【IV Skew 造市商買賣方驗真】｜僅顯示最新分析快照</p>
     </div>
     <div class="header-metrics">
+      <button class="theme-btn" id="theme-toggle-btn" onclick="toggleTheme()">
+        🌙 切換黑底模式
+      </button>
       <div class="metric-pill">
-        <div class="label">最新快照編號 (Snapshot)</div>
+        <div class="label">最新快照 (Snapshot)</div>
         <div class="val" id="disp-date">--</div>
       </div>
       <div class="metric-pill">
@@ -373,22 +510,55 @@
     </div>
   </div>
 
-  <!-- Main Content Grid -->
+  <!-- BARCHART STYLE FULL-WIDTH CHART -->
+  <div class="barchart-panel">
+    <div class="barchart-header">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchMode('vgex', this)">📊 今日即時 vGEX (0DTE 主力)</button>
+        <button class="tab-btn" onclick="switchMode('oigex', this)">🏛️ 昨日留倉 OI GEX (Barchart 傳統)</button>
+        <button class="tab-btn" onclick="switchMode('pin', this)">🧲 磁吸強度 (Pin Strength 總絕對值)</button>
+        <button class="tab-btn" onclick="switchMode('dvgex', this)">⚡ 盤中增量 ΔVolume</button>
+      </div>
+      <div style="font-size:12px; color:var(--text-muted);">
+        💡 滑鼠移至柱狀圖可查看該履約價完整 ES 點位、IV 與磁吸數據（點擊圖例可開關輔助線）
+      </div>
+    </div>
+
+    <div class="barchart-title-area">
+      <h2 id="barchart-main-title">$SPX - Gamma Exposure by Strike (Intraday 0DTE vGEX)</h2>
+      <div class="barchart-legend">
+        <span class="legend-item" onclick="toggleSeries('bars', this)">
+          <span class="dot-blue"></span><span class="dot-orange" style="margin-left:-3px;"></span> Gamma Exposure by Strike (左軸)
+        </span>
+        <span class="legend-item" id="leg-agg" onclick="toggleSeries('agg', this)">
+          <span class="line-agg"></span> Aggregate Gamma Exposure 累積曲線 (右軸)
+        </span>
+        <span class="legend-item" id="leg-put" onclick="toggleSeries('put', this)">
+          <span class="line-put"></span> Put Wall
+        </span>
+        <span class="legend-item" id="leg-call" onclick="toggleSeries('call', this)">
+          <span class="line-call"></span> Call Wall
+        </span>
+      </div>
+    </div>
+
+    <div class="svg-chart-wrapper" id="barchart-wrapper">
+      <svg id="barchart-svg" width="100%" height="100%" viewBox="0 0 1280 360" preserveAspectRatio="none"></svg>
+      <div class="chart-tooltip" id="barchart-tooltip"></div>
+    </div>
+  </div>
+
+  <!-- Main Content Grid Below: Left Strike Ladder + Right AI Report -->
   <div class="main-grid">
-    <!-- Left Panel: Strike Bar Chart -->
+    <!-- Left Panel: Strike Ladder & Pin Strength Guide -->
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">📊 各履約價 GEX 結構分佈圖</div>
-        <div class="tabs">
-          <button class="tab-btn active" onclick="switchMode('vgex', this)">今日即時 vGEX (0DTE 主力)</button>
-          <button class="tab-btn" onclick="switchMode('oigex', this)">昨日留倉 OI GEX</button>
-          <button class="tab-btn" onclick="switchMode('pin', this)">磁吸強度 (Abs Gamma)</button>
-          <button class="tab-btn" onclick="switchMode('dvgex', this)">盤中增量 ΔVolume</button>
-        </div>
+        <div class="panel-title">🪜 報價梯視角 (Strike Ladder) ＆ 隱含波動率 (IV)</div>
+        <div style="font-size:12px; color:var(--text-muted);" id="ladder-sub-label">由高履約價至低履約價排列</div>
       </div>
       <div style="display:grid; grid-template-columns:115px 1fr 85px 68px; gap:8px; padding:0 6px 6px; font-size:11px; color:var(--text-muted); border-bottom:1px solid var(--border); margin-bottom:6px;">
         <div>SPX (ES 點位)</div>
-        <div style="text-align:center;">負 Gamma (加速) ◄─── 0 ───► 正 Gamma (減速/阻力)</div>
+        <div style="text-align:center;">負 Gamma (橘/紅) ◄─── 0 ───► 正 Gamma (藍/綠)</div>
         <div style="text-align:right;" id="col-metric-title">vGEX ($B)</div>
         <div style="text-align:right;">IV (%)</div>
       </div>
@@ -400,7 +570,7 @@
       <div class="panel-header" style="margin-bottom:2px;">
         <div class="panel-title">
           🧠 最新一期 AI 實戰量化分析報告
-          <span style="font-size:11px; font-weight:400; color:var(--pos-green);" id="report-timestamp">--</span>
+          <span style="font-size:11px; font-weight:600; color:var(--pos-green);" id="report-timestamp">--</span>
         </div>
       </div>
 
@@ -422,8 +592,19 @@
         <div id="dynamic-delta-content"></div>
       </div>
 
-      <div class="diag-card" id="extra-notes-card" style="border-color: var(--pos-green); background: rgba(16, 185, 129, 0.05);">
-        <h3>📌 當期重點觀察備註</h3>
+      <div class="diag-card" style="border-color: #9333ea;">
+        <h3>🧲 「磁吸強度（Pin Strength）」實戰看盤指南</h3>
+        <ul>
+          <li><strong>為什麼「淨 GEX 很小」的點位，反而可能是最大磁鐵？</strong><br>
+          一般圖表只算 <code>Call - Put</code>（相減）。例如 <strong>7650</strong> 有 7.55萬口 Call 與 7.32萬口 Put，兩邊相減幾乎抵銷（看似柱子很短）；但<strong>相加（Call + Put）高達 14.87 萬口（$132.7B）</strong>！</li>
+          <li><strong>實戰怎麼用？</strong><br>
+          1. <strong>盤中震盪目標</strong>：磁吸強度最大的前 1~2 個履約價（King Pin），代表市場雙邊重兵交戰區，造市商在該處雙邊對沖盤最厚，價格進入該區會像陷入泥沼一樣黏住。<br>
+          2. <strong>尾盤 14:30~16:00 收盤釘住點</strong>：當午後趨勢走完、無新宏觀消息時，收盤價極高機率被吸回「現價附近磁吸強度最大」的那根柱子收盤。</li>
+        </ul>
+      </div>
+
+      <div class="diag-card" id="extra-notes-card" style="border-color: var(--pos-green); background: var(--pos-green-bg);">
+        <h3>📌 當期重點觀察與行情複盤</h3>
         <div id="extra-notes-content"></div>
       </div>
     </div>
@@ -442,6 +623,42 @@
 <script>
 const SNAPSHOT = {"date": "2026-09-01", "seq": 1, "spot": 7638.66, "updated_at": "2026-09-01 Snapshot #001", "raw_csv_file": "data/2026-09-01/20260901_001_spot7638.66_raw.csv", "calc_json_file": "data/2026-09-01/20260901_001_spot7638.66_calc.json", "key_levels": {"gamma_flip": 7650, "call_wall": {"strike": 7660, "iv": 0.14020081, "gamma": 0.0104538, "c_delta": 0.14025521, "p_delta": -0.85970396, "vega": 0.35236051, "c_theta": -1.5221431, "p_theta": -1.26294863, "cvol": 93918, "pvol": 34237, "coi": 228, "poi": 1807, "oi_gex": -963.14, "vol_vgex": 36403.63, "pin_vgex": 78170.72, "iv_curvature": -0.000496, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, "put_trigger": {"strike": 7630, "iv": 0.15588901, "gamma": 0.01613915, "c_delta": 0.61570051, "p_delta": -0.38424705, "vega": 0.58239058, "c_theta": -6.63612598, "p_theta": -6.37743245, "cvol": 13296, "pvol": 66386, "coi": 806, "poi": 1689, "oi_gex": -831.53, "vol_vgex": -49995.13, "pin_vgex": 75036.96, "iv_curvature": -0.00012, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, "put_oi_wall": {"strike": 7600, "iv": 0.18854269, "gamma": 0.00622449, "c_delta": 0.89914606, "p_delta": -0.10086853, "vega": 0.28026798, "c_theta": -1.60166539, "p_theta": -1.35891618, "cvol": 1489, "pvol": 42039, "coi": 841, "poi": 3563, "oi_gex": -988.61, "vol_vgex": -14727.5, "pin_vgex": 15809.09, "iv_curvature": 0.002244, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, "king_pin": {"strike": 7650, "iv": 0.14216994, "gamma": 0.01528835, "c_delta": 0.26968383, "p_delta": -0.73033384, "vega": 0.50876737, "c_theta": -3.56013728, "p_theta": -3.30108048, "cvol": 75537, "pvol": 73221, "coi": 1128, "poi": 2791, "oi_gex": -1483.5, "vol_vgex": 2066.02, "pin_vgex": 132701.34, "iv_curvature": -0.000538, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, "atm_row": {"strike": 7640, "iv": 0.1472584, "gamma": 0.01762338, "c_delta": 0.44231127, "p_delta": -0.55764389, "vega": 0.60033777, "c_theta": -7.39377712, "p_theta": -7.13502433, "cvol": 34072, "pvol": 73568, "coi": 232, "poi": 1892, "oi_gex": -1706.99, "vol_vgex": -40614.09, "pin_vgex": 110687.16, "iv_curvature": -0.000635, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, "min_iv_row": {"strike": 7670, "iv": 0.13984203, "gamma": 0.00513739, "c_delta": 0.04974859, "p_delta": -0.95026651, "vega": 0.17340125, "c_theta": -0.41491895, "p_theta": -0.17302526, "cvol": 72560, "pvol": 7468, "coi": 673, "poi": 1192, "oi_gex": -155.58, "vol_vgex": 19512.12, "pin_vgex": 23989.37, "iv_curvature": -0.002542, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, "call_wall_dealer_long": true}, "delta_summary": {"has_prev": false}, "extra_notes_html": "\n        <ul>\n          <li><strong>真實行情複盤驗證（2026-09-01）</strong>：</li>\n          <li>🎯 <strong>當日真實最高點 <span class=\"highlight-green\">7,663.63</span></strong>：衝進本表算出的 <code>7660~7665</code> 造市商正 Gamma 賣牆後立刻反轉見頂！</li>\n          <li>🎯 <strong>當日真實最低點 <span class=\"highlight-cyan\">7,611.20</span></strong>：跌破 <code>7630</code> 最大負 Gamma 扳機後急殺，精準停在 <code>7610</code> 隔夜 Put OI 最大支撐牆（僅差 1.2 點）！</li>\n          <li>🎯 <strong>當日真實收盤價 <span class=\"highlight-gold\">7,631.47</span></strong>：尾盤 Charm 回補流將指數拉回並精準釘在 <code>7630</code> 最大 Put 成交量柱旁（僅差 1.47 點）！</li>\n        </ul>\n        ", "rows": [{"strike": 7550, "iv": 0.28069732, "gamma": 0.00100771, "c_delta": 0.98340019, "p_delta": -0.01661099, "vega": 0.06827216, "c_theta": -0.50278894, "p_theta": -0.24514218, "cvol": 46, "pvol": 8603, "coi": 127, "poi": 3787, "oi_gex": -215.2, "vol_vgex": -503.14, "pin_vgex": 508.55, "iv_curvature": 0.005773, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7555, "iv": 0.26915228, "gamma": 0.00116013, "c_delta": 0.98122851, "p_delta": -0.01878067, "vega": 0.07573769, "c_theta": -0.5291002, "p_theta": -0.2713848, "cvol": 7, "pvol": 4328, "coi": 28, "poi": 1048, "oi_gex": -69.05, "vol_vgex": -292.5, "pin_vgex": 293.45, "iv_curvature": -0.00029, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7560, "iv": 0.25818723, "gamma": 0.00133732, "c_delta": 0.97880016, "p_delta": -0.02121702, "vega": 0.08388718, "c_theta": -0.5579107, "p_theta": -0.29922057, "cvol": 133, "pvol": 8030, "coi": 113, "poi": 1209, "oi_gex": -85.52, "vol_vgex": -616.21, "pin_vgex": 636.97, "iv_curvature": 0.003739, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7565, "iv": 0.23974361, "gamma": 0.00154327, "c_delta": 0.97611262, "p_delta": -0.02390436, "vega": 0.09389368, "c_theta": -0.58592722, "p_theta": -0.32803835, "cvol": 15, "pvol": 7564, "coi": 26, "poi": 2242, "oi_gex": -199.55, "vol_vgex": -679.78, "pin_vgex": 682.48, "iv_curvature": -0.004246, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7570, "iv": 0.22979122, "gamma": 0.0017827, "c_delta": 0.97268861, "p_delta": -0.02734589, "vega": 0.10421104, "c_theta": -0.61767605, "p_theta": -0.37547491, "cvol": 146, "pvol": 8377, "coi": 94, "poi": 1158, "oi_gex": -110.68, "vol_vgex": -856.18, "pin_vgex": 886.55, "iv_curvature": -0.001531, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7575, "iv": 0.22290163, "gamma": 0.00205996, "c_delta": 0.96448506, "p_delta": -0.03553324, "vega": 0.12780414, "c_theta": -0.73762174, "p_theta": -0.4791856, "cvol": 103, "pvol": 18009, "coi": 119, "poi": 1121, "oi_gex": -120.44, "vol_vgex": -2152.25, "pin_vgex": 2177.01, "iv_curvature": -0.000794, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7580, "iv": 0.21760066, "gamma": 0.00238069, "c_delta": 0.96014557, "p_delta": -0.03986953, "vega": 0.14025512, "c_theta": -0.78883794, "p_theta": -0.52835489, "cvol": 512, "pvol": 22547, "coi": 43, "poi": 1957, "oi_gex": -265.88, "vol_vgex": -3060.91, "pin_vgex": 3203.15, "iv_curvature": 0.001506, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7585, "iv": 0.20928818, "gamma": 0.00288934, "c_delta": 0.95353162, "p_delta": -0.04648549, "vega": 0.15827255, "c_theta": -0.85914797, "p_theta": -0.60757479, "cvol": 242, "pvol": 14795, "coi": 16, "poi": 1148, "oi_gex": -190.84, "vol_vgex": -2453.5, "pin_vgex": 2535.09, "iv_curvature": -0.000626, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7590, "iv": 0.2022269, "gamma": 0.003769, "c_delta": 0.94226856, "p_delta": -0.05774675, "vega": 0.18696275, "c_theta": -1.00181392, "p_theta": -0.75800053, "cvol": 325, "pvol": 19733, "coi": 75, "poi": 1491, "oi_gex": -311.4, "vol_vgex": -4268.17, "pin_vgex": 4411.11, "iv_curvature": 0.000735, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7595, "iv": 0.19369634, "gamma": 0.00494833, "c_delta": 0.92204619, "p_delta": -0.0779689, "vega": 0.23329893, "c_theta": -1.28990887, "p_theta": -1.03809474, "cvol": 362, "pvol": 21879, "coi": 127, "poi": 1733, "oi_gex": -463.7, "vol_vgex": -6212.62, "pin_vgex": 6421.66, "iv_curvature": -0.001688, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7600, "iv": 0.18854269, "gamma": 0.00622449, "c_delta": 0.89914606, "p_delta": -0.10086853, "vega": 0.28026798, "c_theta": -1.60166539, "p_theta": -1.35891618, "cvol": 1489, "pvol": 42039, "coi": 841, "poi": 3563, "oi_gex": -988.61, "vol_vgex": -14727.5, "pin_vgex": 15809.09, "iv_curvature": 0.002244, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7605, "iv": 0.17890068, "gamma": 0.00721379, "c_delta": 0.88324399, "p_delta": -0.11677311, "vega": 0.30980229, "c_theta": -1.81416262, "p_theta": -1.55592273, "cvol": 1007, "pvol": 24864, "coi": 59, "poi": 1984, "oi_gex": -810.27, "vol_vgex": -10041.85, "pin_vgex": 10889.58, "iv_curvature": -0.00343, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7610, "iv": 0.17611966, "gamma": 0.00886247, "c_delta": 0.8459028, "p_delta": -0.15409638, "vega": 0.37108179, "c_theta": -2.41248522, "p_theta": -2.15414517, "cvol": 1873, "pvol": 35195, "coi": 92, "poi": 2277, "oi_gex": -1129.9, "vol_vgex": -17231.39, "pin_vgex": 19168.51, "iv_curvature": 0.002164, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7615, "iv": 0.16900991, "gamma": 0.01076042, "c_delta": 0.80406066, "p_delta": -0.19594718, "vega": 0.4291115, "c_theta": -3.05765899, "p_theta": -2.79921718, "cvol": 1906, "pvol": 32017, "coi": 102, "poi": 1982, "oi_gex": -1180.38, "vol_vgex": -18905.53, "pin_vgex": 21298.93, "iv_curvature": -0.001806, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7620, "iv": 0.16551134, "gamma": 0.01282296, "c_delta": 0.75010029, "p_delta": -0.24982687, "vega": 0.4903064, "c_theta": -4.01492972, "p_theta": -3.75640037, "cvol": 3880, "pvol": 49309, "coi": 269, "poi": 1697, "oi_gex": -1068.44, "vol_vgex": -33990.36, "pin_vgex": 39796.46, "iv_curvature": 0.000504, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7625, "iv": 0.1610045, "gamma": 0.01452657, "c_delta": 0.68410229, "p_delta": -0.31583488, "vega": 0.54438213, "c_theta": -5.2668467, "p_theta": -5.00822414, "cvol": 5337, "pvol": 51155, "coi": 806, "poi": 2069, "oi_gex": -1070.53, "vol_vgex": -38835.92, "pin_vgex": 47883.34, "iv_curvature": 0.000304, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7630, "iv": 0.15588901, "gamma": 0.01613915, "c_delta": 0.61570051, "p_delta": -0.38424705, "vega": 0.58239058, "c_theta": -6.63612598, "p_theta": -6.37743245, "cvol": 13296, "pvol": 66386, "coi": 806, "poi": 1689, "oi_gex": -831.53, "vol_vgex": -49995.13, "pin_vgex": 75036.96, "iv_curvature": -0.00012, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7635, "iv": 0.15101329, "gamma": 0.01731108, "c_delta": 0.53408069, "p_delta": -0.46593647, "vega": 0.6043282, "c_theta": -8.48614121, "p_theta": -8.22738493, "cvol": 20768, "pvol": 61642, "coi": 265, "poi": 1252, "oi_gex": -996.96, "vol_vgex": -41286.27, "pin_vgex": 83241.22, "iv_curvature": -0.00056, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7640, "iv": 0.1472584, "gamma": 0.01762338, "c_delta": 0.44231127, "p_delta": -0.55764389, "vega": 0.60033777, "c_theta": -7.39377712, "p_theta": -7.13502433, "cvol": 34072, "pvol": 73568, "coi": 232, "poi": 1892, "oi_gex": -1706.99, "vol_vgex": -40614.09, "pin_vgex": 110687.16, "iv_curvature": -0.000635, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7645, "iv": 0.14477369, "gamma": 0.01693333, "c_delta": 0.35150172, "p_delta": -0.64843644, "vega": 0.56988084, "c_theta": -6.33461926, "p_theta": -6.0758757, "cvol": 39303, "pvol": 61314, "coi": 626, "poi": 1187, "oi_gex": -554.29, "vol_vgex": -21747.86, "pin_vgex": 99414.13, "iv_curvature": 6e-05, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7650, "iv": 0.14216994, "gamma": 0.01528835, "c_delta": 0.26968383, "p_delta": -0.73033384, "vega": 0.50876737, "c_theta": -3.56013728, "p_theta": -3.30108048, "cvol": 75537, "pvol": 73221, "coi": 1128, "poi": 2791, "oi_gex": -1483.5, "vol_vgex": 2066.02, "pin_vgex": 132701.34, "iv_curvature": -0.000538, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7655, "iv": 0.14064217, "gamma": 0.01308078, "c_delta": 0.1997229, "p_delta": -0.80028426, "vega": 0.43555117, "c_theta": -2.37994883, "p_theta": -2.12083, "cvol": 65896, "pvol": 44279, "coi": 182, "poi": 1428, "oi_gex": -951.01, "vol_vgex": 16499.22, "pin_vgex": 84091.3, "iv_curvature": -0.000543, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7660, "iv": 0.14020081, "gamma": 0.0104538, "c_delta": 0.14025521, "p_delta": -0.85970396, "vega": 0.35236051, "c_theta": -1.5221431, "p_theta": -1.26294863, "cvol": 93918, "pvol": 34237, "coi": 228, "poi": 1807, "oi_gex": -963.14, "vol_vgex": 36403.63, "pin_vgex": 78170.72, "iv_curvature": -0.000496, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7665, "iv": 0.14075135, "gamma": 0.00810067, "c_delta": 0.09653755, "p_delta": -0.90346798, "vega": 0.2787547, "c_theta": -0.99178292, "p_theta": -0.73255011, "cvol": 74862, "pvol": 12229, "coi": 471, "poi": 968, "oi_gex": -234.92, "vol_vgex": 29604.55, "pin_vgex": 41165.04, "iv_curvature": 0.00073, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7670, "iv": 0.13984203, "gamma": 0.00513739, "c_delta": 0.04974859, "p_delta": -0.95026651, "vega": 0.17340125, "c_theta": -0.41491895, "p_theta": -0.17302526, "cvol": 72560, "pvol": 7468, "coi": 673, "poi": 1192, "oi_gex": -155.58, "vol_vgex": 19512.12, "pin_vgex": 23989.37, "iv_curvature": -0.002542, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7675, "iv": 0.14401693, "gamma": 0.00378889, "c_delta": 0.03519261, "p_delta": -0.9648251, "vega": 0.13275005, "c_theta": -0.28538606, "p_theta": -0.04102222, "cvol": 61124, "pvol": 5788, "coi": 2532, "poi": 2480, "oi_gex": 11.5, "vol_vgex": 12233.6, "pin_vgex": 14792.8, "iv_curvature": -0.001076, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7680, "iv": 0.15034325, "gamma": 0.00292897, "c_delta": 0.02692288, "p_delta": -0.97309325, "vega": 0.10761699, "c_theta": -0.21791225, "p_theta": 0.02651218, "cvol": 80356, "pvol": 3801, "coi": 1004, "poi": 1927, "oi_gex": -157.74, "vol_vgex": 13083.47, "pin_vgex": 14382.67, "iv_curvature": -0.000935, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7685, "iv": 0.15854025, "gamma": 0.00196435, "c_delta": 0.01717637, "p_delta": -0.98283973, "vega": 0.07695675, "c_theta": -0.14232694, "p_theta": 0.102155, "cvol": 59051, "pvol": 2266, "coi": 1004, "poi": 1349, "oi_gex": -39.54, "vol_vgex": 6508.59, "pin_vgex": 7028.04, "iv_curvature": 0.000176, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7690, "iv": 0.1663854, "gamma": 0.00138523, "c_delta": 0.01253085, "p_delta": -0.98748436, "vega": 0.05782249, "c_theta": -0.10178023, "p_theta": 0.1427147, "cvol": 32774, "pvol": 1730, "coi": 1517, "poi": 2264, "oi_gex": -60.38, "vol_vgex": 2509.19, "pin_vgex": 2788.85, "iv_curvature": -0.000477, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7695, "iv": 0.17518543, "gamma": 0.00103767, "c_delta": 0.00965779, "p_delta": -0.99034573, "vega": 0.04586201, "c_theta": -0.07949262, "p_theta": 0.16483779, "cvol": 18891, "pvol": 630, "coi": 981, "poi": 1009, "oi_gex": -1.7, "vol_vgex": 1105.65, "pin_vgex": 1181.94, "iv_curvature": -0.000262, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7700, "iv": 0.18450976, "gamma": 0.0008089, "c_delta": 0.00874756, "p_delta": -0.99126805, "vega": 0.04236885, "c_theta": -0.07613869, "p_theta": 0.16838781, "cvol": 21424, "pvol": 932, "coi": 3403, "poi": 1736, "oi_gex": 78.68, "vol_vgex": 967.19, "pin_vgex": 1055.17, "iv_curvature": -0.000294, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7705, "iv": 0.1944217, "gamma": 0.00093053, "c_delta": 0.00957104, "p_delta": -0.99044407, "vega": 0.04530685, "c_theta": -0.08888247, "p_theta": 0.15507567, "cvol": 9316, "pvol": 207, "coi": 2071, "poi": 358, "oi_gex": 93.01, "vol_vgex": 494.58, "pin_vgex": 517.06, "iv_curvature": 0.000158, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7710, "iv": 0.20401853, "gamma": 0.00078702, "c_delta": 0.00909557, "p_delta": -0.99092103, "vega": 0.04263751, "c_theta": -0.08468751, "p_theta": 0.15958747, "cvol": 7308, "pvol": 356, "coi": 1936, "poi": 492, "oi_gex": 66.31, "vol_vgex": 319.25, "pin_vgex": 351.95, "iv_curvature": -0.000924, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7715, "iv": 0.21546418, "gamma": 0.00063021, "c_delta": 0.00829779, "p_delta": -0.99171941, "vega": 0.03925499, "c_theta": -0.06929426, "p_theta": 0.17504453, "cvol": 5419, "pvol": 197, "coi": 1681, "poi": 716, "oi_gex": 35.49, "vol_vgex": 192.02, "pin_vgex": 206.51, "iv_curvature": 0.000319, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7720, "iv": 0.22627128, "gamma": 0.00061257, "c_delta": 0.00765862, "p_delta": -0.99235858, "vega": 0.03645777, "c_theta": -0.06678918, "p_theta": 0.17293342, "cvol": 6844, "pvol": 464, "coi": 2395, "poi": 981, "oi_gex": 50.54, "vol_vgex": 228.04, "pin_vgex": 261.21, "iv_curvature": -3.5e-05, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7725, "iv": 0.23714918, "gamma": 0.00054915, "c_delta": 0.0071708, "p_delta": -0.99284674, "vega": 0.03414967, "c_theta": -0.06413963, "p_theta": 0.17988879, "cvol": 7767, "pvol": 198, "coi": 3022, "poi": 1452, "oi_gex": 50.31, "vol_vgex": 242.53, "pin_vgex": 255.22, "iv_curvature": -0.0, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7730, "iv": 0.24802743, "gamma": 0.00049583, "c_delta": 0.00668915, "p_delta": -0.99332805, "vega": 0.03213863, "c_theta": -0.06190826, "p_theta": 0.17893097, "cvol": 4654, "pvol": 319, "coi": 2976, "poi": 468, "oi_gex": 72.56, "vol_vgex": 125.42, "pin_vgex": 143.88, "iv_curvature": 6.8e-05, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}, {"strike": 7735, "iv": 0.25877011, "gamma": 0.00044939, "c_delta": 0.00628098, "p_delta": -0.99373623, "vega": 0.03033239, "c_theta": -0.05979149, "p_theta": 0.18111826, "cvol": 3643, "pvol": 55, "coi": 1740, "poi": 328, "oi_gex": 37.02, "vol_vgex": 94.08, "pin_vgex": 96.97, "iv_curvature": 0.005371, "dcvol": 0, "dpvol": 0, "dnet_vol": 0, "div": 0}]};
 let currentMode = 'vgex';
+let showSeries = { bars: true, agg: true, put: true, call: true };
+
+// Remember theme choice in localStorage (default light-theme as requested for Barchart look)
+(function initTheme() {
+  const saved = localStorage.getItem('gex_theme');
+  const body = document.getElementById('app-body');
+  const btn = document.getElementById('theme-toggle-btn');
+  if (saved === 'dark') {
+    body.classList.remove('light-theme');
+    btn.textContent = '☀️ 切換白底模式 (Barchart)';
+  } else {
+    body.classList.add('light-theme');
+    btn.textContent = '🌙 切換黑底模式 (夜盤)';
+  }
+})();
+
+function toggleTheme() {
+  const body = document.getElementById('app-body');
+  const btn = document.getElementById('theme-toggle-btn');
+  if (body.classList.contains('light-theme')) {
+    body.classList.remove('light-theme');
+    localStorage.setItem('gex_theme', 'dark');
+    btn.textContent = '☀️ 切換白底模式 (Barchart)';
+  } else {
+    body.classList.add('light-theme');
+    localStorage.setItem('gex_theme', 'light');
+    btn.textContent = '🌙 切換黑底模式 (夜盤)';
+  }
+  renderBarchartSVG();
+}
+
+function toggleSeries(key, el) {
+  showSeries[key] = !showSeries[key];
+  el.classList.toggle('disabled', !showSeries[key]);
+  renderBarchartSVG();
+}
 
 function switchMode(mode, btn) {
   currentMode = mode;
@@ -453,8 +670,216 @@ function switchMode(mode, btn) {
     'pin': 'Pin ($B)',
     'dvgex': 'ΔVol (口)'
   };
+  const chartTitleMap = {
+    'vgex': '$SPX - Gamma Exposure by Strike (今日 0DTE 即時 vGEX)',
+    'oigex': '$SPX - Gamma Exposure by Strike (昨日留倉 OI GEX)',
+    'pin': '$SPX - Pin Strength / Absolute Gamma by Strike (磁吸強度分佈)',
+    'dvgex': '$SPX - Intraday Volume Change by Strike (盤中增量 ΔVolume)'
+  };
   document.getElementById('col-metric-title').textContent = titleMap[mode];
+  document.getElementById('barchart-main-title').textContent = chartTitleMap[mode];
   renderDashboard();
+}
+
+function renderBarchartSVG() {
+  const svg = document.getElementById('barchart-svg');
+  const tooltip = document.getElementById('barchart-tooltip');
+  const isLight = document.getElementById('app-body').classList.contains('light-theme');
+  const basis = parseFloat(document.getElementById('es-basis').value) || 0;
+  const spot = SNAPSHOT.spot;
+
+  // Ascending strikes from left to right (just like Barchart!)
+  const data = [...SNAPSHOT.rows].sort((a, b) => a.strike - b.strike);
+  const n = data.length;
+
+  const W = 1280, H = 360;
+  const padL = 72, padR = 78, padT = 26, padB = 38;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  // Extract bar values & cumulative aggregate values
+  const barVals = data.map(d => {
+    if (currentMode === 'vgex') return d.vol_vgex / 1000.0; // $B
+    if (currentMode === 'oigex') return d.oi_gex / 1000.0;  // $B
+    if (currentMode === 'pin') return d.pin_vgex / 1000.0;  // $B
+    return (d.dnet_vol || 0) / 1000.0; // k contracts
+  });
+
+  // Compute Barchart-style Aggregate Gamma Exposure curve (running cumulative net gamma across strikes)
+  let running = 0;
+  const aggVals = barVals.map(v => {
+    running += v;
+    return running;
+  });
+
+  // Left Axis bounds (Bar values)
+  let minBar = Math.min(0, ...barVals);
+  let maxBar = Math.max(0.1, ...barVals);
+  if (currentMode !== 'pin') {
+    const absM = Math.max(Math.abs(minBar), Math.abs(maxBar));
+    maxBar = absM * 1.15;
+    minBar = -absM * 1.15;
+  } else {
+    minBar = 0;
+    maxBar = maxBar * 1.15;
+  }
+
+  // Align zero ratio between Left Axis and Right Axis for clean visual reading
+  const zeroRatio = (maxBar - 0) / (maxBar - minBar); // fraction from top of plotH where 0 sits
+  const zeroY = padT + zeroRatio * plotH;
+
+  let minAgg = Math.min(0, ...aggVals);
+  let maxAgg = Math.max(0.1, ...aggVals);
+  const maxAbsAgg = Math.max(Math.abs(minAgg), Math.abs(maxAgg), 0.1) * 1.15;
+
+  const yLeft = (v) => padT + ((maxBar - v) / (maxBar - minBar)) * plotH;
+  const yRight = (v) => {
+    if (currentMode === 'pin') {
+      return padT + ((maxAgg * 1.1 - v) / (maxAgg * 1.1)) * plotH;
+    }
+    // Keep 0 aligned with zeroY
+    if (v >= 0) {
+      return zeroY - (v / maxAbsAgg) * (zeroY - padT);
+    } else {
+      return zeroY + (Math.abs(v) / maxAbsAgg) * (padT + plotH - zeroY);
+    }
+  };
+
+  const stepX = plotW / n;
+  const xAtIdx = (i) => padL + (i + 0.5) * stepX;
+
+  const textColor = isLight ? '#475569' : '#94a3b8';
+  const gridColor = isLight ? '#e2e8f0' : 'rgba(148,163,184,0.16)';
+  const posZoneBg = isLight ? 'rgba(220, 252, 231, 0.55)' : 'rgba(16, 185, 129, 0.05)';
+  const negZoneBg = isLight ? 'rgba(254, 242, 242, 0.45)' : 'rgba(244, 63, 94, 0.04)';
+  const posBarColor = isLight ? '#001aff' : '#3b82f6';
+  const negBarColor = isLight ? '#f59e0b' : '#f59e0b';
+  const pinBarColor = isLight ? '#7c3aed' : '#a855f7';
+  const aggLineColor = isLight ? '#3b9eff' : '#38bdf8';
+
+  let out = '';
+
+  // 1. Background Shading (Green tint above 0, subtle warm tint below 0 like Barchart)
+  out += `<rect x="${padL}" y="${padT}" width="${plotW}" height="${zeroY - padT}" fill="${posZoneBg}" />`;
+  if (zeroY < padT + plotH) {
+    out += `<rect x="${padL}" y="${zeroY}" width="${plotW}" height="${padT + plotH - zeroY}" fill="${negZoneBg}" />`;
+  }
+
+  // 2. Horizontal Grid Lines & Left/Right Y-Axis Labels
+  const ticks = 5;
+  for (let t = 0; t <= ticks; t++) {
+    const frac = t / ticks;
+    const y = padT + frac * plotH;
+    const valL = maxBar - frac * (maxBar - minBar);
+    let valR;
+    if (currentMode === 'pin') {
+      valR = (maxAgg * 1.1) * (1 - frac);
+    } else {
+      valR = y <= zeroY
+        ? ((zeroY - y) / (zeroY - padT || 1)) * maxAbsAgg
+        : -((y - zeroY) / (padT + plotH - zeroY || 1)) * maxAbsAgg;
+    }
+    out += `<line x1="${padL}" y1="${y}" x2="${padL + plotW}" y2="${y}" stroke="${gridColor}" stroke-width="1" />`;
+    out += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" fill="${textColor}" font-size="11" font-family="monospace">${valL.toFixed(2)}B</text>`;
+    out += `<text x="${padL + plotW + 8}" y="${y + 4}" text-anchor="start" fill="${textColor}" font-size="11" font-family="monospace">${valR.toFixed(1)}B</text>`;
+  }
+
+  // Zero horizontal baseline
+  out += `<line x1="${padL}" y1="${zeroY}" x2="${padL + plotW}" y2="${zeroY}" stroke="${isLight ? '#94a3b8' : '#475569'}" stroke-width="1.2" />`;
+
+  // 3. Put Wall & Call Wall Vertical Lines (if enabled)
+  const callWallStrike = SNAPSHOT.key_levels.call_wall.strike;
+  const putWallStrike = SNAPSHOT.key_levels.put_trigger.strike;
+  data.forEach((d, i) => {
+    const cx = xAtIdx(i);
+    if (showSeries.put && d.strike === putWallStrike) {
+      out += `<line x1="${cx}" y1="${padT}" x2="${cx}" y2="${padT + plotH}" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5,4" />`;
+      out += `<text x="${cx - 4}" y="${padT + plotH - 8}" text-anchor="end" fill="#ef4444" font-size="11" font-weight="bold">Put Wall ${d.strike}</text>`;
+    }
+    if (showSeries.call && d.strike === callWallStrike) {
+      out += `<line x1="${cx}" y1="${padT}" x2="${cx}" y2="${padT + plotH}" stroke="#10b981" stroke-width="1.5" stroke-dasharray="5,4" />`;
+      out += `<text x="${cx + 4}" y="${padT + plotH - 8}" text-anchor="start" fill="#10b981" font-size="11" font-weight="bold">Call Wall ${d.strike}</text>`;
+    }
+  });
+
+  // 4. Vertical Strike Bars (Blue for Positive, Orange for Negative, just like Barchart!)
+  const barW = Math.max(6, stepX * 0.42);
+  if (showSeries.bars) {
+    data.forEach((d, i) => {
+      const v = barVals[i];
+      const cx = xAtIdx(i);
+      const yVal = yLeft(v);
+      const topY = Math.min(zeroY, yVal);
+      const barH = Math.max(2, Math.abs(yVal - zeroY));
+      const fill = currentMode === 'pin' ? pinBarColor : (v >= 0 ? posBarColor : negBarColor);
+      out += `<rect x="${cx - barW/2}" y="${topY}" width="${barW}" height="${barH}" fill="${fill}" rx="1.5" />`;
+    });
+  }
+
+  // 5. Aggregate Gamma Exposure Smooth Line (Right Axis)
+  if (showSeries.agg) {
+    const pts = data.map((d, i) => `${xAtIdx(i).toFixed(1)},${yRight(aggVals[i]).toFixed(1)}`).join(' ');
+    out += `<polyline fill="none" stroke="${aggLineColor}" stroke-width="2.5" points="${pts}" />`;
+  }
+
+  // 6. Last Price Vertical Green Line (interpolated across strikes)
+  const minS = data[0].strike, maxS = data[n - 1].strike;
+  if (spot >= minS && spot <= maxS) {
+    const fracSpot = (spot - minS) / (maxS - minS);
+    const spotX = xAtIdx(0) + fracSpot * (xAtIdx(n - 1) - xAtIdx(0));
+    out += `<line x1="${spotX}" y1="${padT}" x2="${spotX}" y2="${padT + plotH}" stroke="#15803d" stroke-width="2.2" />`;
+    out += `<text x="${spotX + 6}" y="${padT + 15}" fill="#15803d" font-size="13" font-weight="bold">Last Price: ${spot.toFixed(2)} (ES ${(spot+basis).toFixed(2)})</text>`;
+  }
+
+  // 7. X-Axis Strike Ticks & Labels
+  data.forEach((d, i) => {
+    if (d.strike % 25 === 0 || i === 0 || i === n - 1) {
+      const cx = xAtIdx(i);
+      out += `<line x1="${cx}" y1="${padT + plotH}" x2="${cx}" y2="${padT + plotH + 6}" stroke="${textColor}" stroke-width="1.2" />`;
+      out += `<text x="${cx}" y="${padT + plotH + 22}" text-anchor="middle" fill="${textColor}" font-size="12" font-weight="600" font-family="monospace">${d.strike}</text>`;
+    }
+  });
+
+  // 8. Invisible Hover Columns for Rich Tooltip
+  data.forEach((d, i) => {
+    const cx = xAtIdx(i);
+    out += `<rect x="${cx - stepX/2}" y="${padT}" width="${stepX}" height="${plotH}" fill="transparent" style="cursor:crosshair;" onmousemove="showBarTooltip(event, ${i})" onmouseleave="hideBarTooltip()" />`;
+  });
+
+  svg.innerHTML = out;
+}
+
+function showBarTooltip(evt, idx) {
+  const data = [...SNAPSHOT.rows].sort((a, b) => a.strike - b.strike);
+  const d = data[idx];
+  const basis = parseFloat(document.getElementById('es-basis').value) || 0;
+  const wrapper = document.getElementById('barchart-wrapper');
+  const tooltip = document.getElementById('barchart-tooltip');
+  const rect = wrapper.getBoundingClientRect();
+
+  tooltip.style.display = 'block';
+  tooltip.innerHTML = `
+    <div style="font-weight:800; font-size:13px; color:#38bdf8; margin-bottom:4px; border-bottom:1px solid #334155; padding-bottom:3px;">
+      SPX ${d.strike} ｜ ES ${(d.strike + basis).toFixed(1)}
+    </div>
+    <div>今日即時 vGEX: <strong style="color:${d.vol_vgex>=0?'#10b981':'#f43f5e'}">${d.vol_vgex>=0?'+':''}${(d.vol_vgex/1000).toFixed(2)}B</strong></div>
+    <div>昨日留倉 OI GEX: <strong>${d.oi_gex>=0?'+':''}${d.oi_gex.toFixed(0)}M</strong></div>
+    <div>🧲 磁吸強度 (Pin): <strong style="color:#f59e0b">$${(d.pin_vgex/1000).toFixed(2)}B</strong></div>
+    <div>今日成交量: Call ${d.cvol.toLocaleString()} / Put ${d.pvol.toLocaleString()}</div>
+    <div>昨日未平倉: Call ${d.coi.toLocaleString()} / Put ${d.poi.toLocaleString()}</div>
+    <div>隱含波動率 (IV): <strong style="color:#22d3ee">${(d.iv*100).toFixed(2)}%</strong></div>
+  `;
+
+  let left = evt.clientX - rect.left + 14;
+  if (left + 230 > rect.width) left = evt.clientX - rect.left - 235;
+  let top = evt.clientY - rect.top - 20;
+  if (top < 10) top = 10;
+  tooltip.style.left = left + 'px';
+  tooltip.style.top = top + 'px';
+}
+
+function hideBarTooltip() {
+  document.getElementById('barchart-tooltip').style.display = 'none';
 }
 
 function renderDashboard() {
@@ -512,7 +937,10 @@ function renderDashboard() {
     regBox.textContent = `⚠️ 負 Gamma 震盪加速口袋 (Flip ${flipStrike} 之下)`;
   }
 
-  // Render Right-Side Analysis Texts (with dynamic ES basis substitution)
+  // Render Barchart SVG
+  renderBarchartSVG();
+
+  // Render Right-Side Analysis Texts
   const atmRow = SNAPSHOT.key_levels.atm_row;
   const minIVRow = SNAPSHOT.key_levels.min_iv_row;
 
@@ -552,10 +980,9 @@ function renderDashboard() {
     deltaBox.innerHTML = ds.html_summary;
   }
 
-  // Extra Notes
   document.getElementById('extra-notes-content').innerHTML = SNAPSHOT.extra_notes_html || '';
 
-  // Render Bar Chart
+  // Render Left Ladder Table
   const sorted = [...optionData].sort((a, b) => b.strike - a.strike);
   let maxAbsVal = 1;
   sorted.forEach(d => {
@@ -583,7 +1010,7 @@ function renderDashboard() {
       const pct = Math.min(50, (Math.abs(rawVal) / maxAbsVal) * 48);
       const isPos = rawVal >= 0;
       isNegColor = !isPos;
-      const color = isPos ? 'var(--pos-green)' : 'var(--neg-red)';
+      const color = isPos ? 'var(--barchart-pos)' : 'var(--barchart-neg)';
       const leftStyle = isPos ? 'left: 50%;' : `left: ${50 - pct}%;`;
       barHtml = `
         <div class="zero-line"></div>
@@ -594,7 +1021,7 @@ function renderDashboard() {
       else valText = (rawVal >= 0 ? '+' : '') + rawVal.toLocaleString();
     } else if (currentMode === 'pin') {
       const pct = Math.min(98, (d.pin_vgex / maxAbsVal) * 96);
-      barHtml = `<div class="bar-fill" style="width:${pct}%; background:var(--pin-gold);"></div>`;
+      barHtml = `<div class="bar-fill" style="width:${pct}%; background:#9333ea;"></div>`;
       valText = (d.pin_vgex / 1000).toFixed(1) + 'B';
     }
 
@@ -609,7 +1036,7 @@ function renderDashboard() {
         <span class="es-val">(${(d.strike + basis).toFixed(0)})</span>
       </div>
       <div class="bar-track">${barHtml}</div>
-      <div class="val-col" style="color:${isNegColor ? 'var(--neg-red)' : 'var(--pos-green)'}">${valText}</div>
+      <div class="val-col" style="color:${isNegColor ? 'var(--barchart-neg)' : 'var(--barchart-pos)'}">${valText}</div>
       <div class="iv-col">${ivHtml}</div>
     `;
     container.appendChild(row);
