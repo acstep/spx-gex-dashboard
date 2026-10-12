@@ -3,13 +3,13 @@
   "total_snapshots": 1,
   "latest": {
     "date": "2026-10-12",
-    "seq": 7,
-    "spot": 7805.3,
-    "raw_csv": "data/2026-10-12/20261012_007_spot7805.30_raw.csv",
-    "calc_json": "data/2026-10-12/20261012_007_spot7805.30_calc.json",
+    "seq": 8,
+    "spot": 7806.72,
+    "raw_csv": "data/2026-10-12/20261012_008_spot7806.72_raw.csv",
+    "calc_json": "data/2026-10-12/20261012_008_spot7806.72_calc.json",
     "gamma_flip": 7815,
     "call_wall": 7820,
-    "put_trigger": 7790,
+    "put_trigger": 7805,
     "put_oi_wall": 7750,
     "king_pin": 7810
   },
@@ -109,6 +109,18 @@
       "gamma_flip": 7815,
       "call_wall": 7820,
       "put_trigger": 7790,
+      "put_oi_wall": 7750,
+      "king_pin": 7810
+    },
+    {
+      "date": "2026-10-12",
+      "seq": 8,
+      "spot": 7806.72,
+      "raw_csv": "data/2026-10-12/20261012_008_spot7806.72_raw.csv",
+      "calc_json": "data/2026-10-12/20261012_008_spot7806.72_calc.json",
+      "gamma_flip": 7815,
+      "call_wall": 7820,
+      "put_trigger": 7805,
       "put_oi_wall": 7750,
       "king_pin": 7810
     }
