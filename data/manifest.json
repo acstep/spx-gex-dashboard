@@ -3,15 +3,15 @@
   "total_snapshots": 1,
   "latest": {
     "date": "2026-10-12",
-    "seq": 5,
-    "spot": 7813.14,
-    "raw_csv": "data/2026-10-12/20261012_005_spot7813.14_raw.csv",
-    "calc_json": "data/2026-10-12/20261012_005_spot7813.14_calc.json",
-    "gamma_flip": 7820,
-    "call_wall": 7830,
-    "put_trigger": 7810,
+    "seq": 6,
+    "spot": 7809.15,
+    "raw_csv": "data/2026-10-12/20261012_006_spot7809.15_raw.csv",
+    "calc_json": "data/2026-10-12/20261012_006_spot7809.15_calc.json",
+    "gamma_flip": 7815,
+    "call_wall": 7820,
+    "put_trigger": 7790,
     "put_oi_wall": 7750,
-    "king_pin": 7815
+    "king_pin": 7810
   },
   "history": [
     {
@@ -87,6 +87,18 @@
       "put_trigger": 7810,
       "put_oi_wall": 7750,
       "king_pin": 7815
+    },
+    {
+      "date": "2026-10-12",
+      "seq": 6,
+      "spot": 7809.15,
+      "raw_csv": "data/2026-10-12/20261012_006_spot7809.15_raw.csv",
+      "calc_json": "data/2026-10-12/20261012_006_spot7809.15_calc.json",
+      "gamma_flip": 7815,
+      "call_wall": 7820,
+      "put_trigger": 7790,
+      "put_oi_wall": 7750,
+      "king_pin": 7810
     }
   ]
 }
