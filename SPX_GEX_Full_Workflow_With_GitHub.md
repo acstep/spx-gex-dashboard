@@ -104,6 +104,19 @@ $$\Delta\text{CallVol}_K = \text{CallVol}_{K, t} - \text{CallVol}_{K, t-1}, \qua
 $$\Delta\text{IV}_K = \text{IV}_{K, t} - \text{IV}_{K, t-1}$$
 - **$\Delta\text{Vol}$ 暴增 + $\Delta\text{IV} > 0$** $\rightarrow$ 主力資金正在**主動敲進（買方開倉）**，造市商被迫站賣方（Short Gamma 增加）。
 - **$\Delta\text{Vol}$ 暴增 + $\Delta\text{IV} < 0$** $\rightarrow$ 主力資金正在**主動拋售（賣方開倉或買方止盈平倉）**，造市商站在買方（Long Gamma 增加）。
+- **假突破 / 假跌破驗真**：若指數短線跌破某關卡（如 `7805`），但下方更深價外 Put（如 `7800`、`7795`）出現 **$\Delta\text{PutVol} = 0$（零新增追空）且 $\Delta\text{IV} < 0$（全場縮波）**，即實錘為「假跌破誘空陷阱（Bear Trap）」，應逢低承接看回中心磁王。
+
+---
+
+### Step 5：當下需要注意什麼 & 接下來劇本推演與關鍵點位（Scenario Playbooks A / B / C）
+每一筆快照分析（無論在對話文字回覆或網頁 `index.html` 的 `SNAPSHOT.playbook_html` 中）都**必須完整生成以下兩大實戰區塊**：
+
+1. **⚠️ 一、當下最需要注意的實戰關鍵（Points of Caution）**：
+   - 點出當前最容易誤判的結構陷阱（例如：表面負 vGEX 但實為高磁吸減速泥沼、多單已達雙磁王幾何中心必須止盈不可追高、或某履約價由負翻正形成腳下鐵墊等）。
+2. **📈 二、接下來劇本推演與關鍵點位（劇本 A / 劇本 B / 劇本 C）**：
+   - **🎯 劇本 A（主劇本，標註機率 %）**：給出最高機率的走勢路徑、上檔壓制區、下檔支撐墊、收斂中心點，以及具體進出場 / 止盈 / 高拋低吸點位。
+   - **🚀 劇本 B（次劇本，標註機率 %）**：給出向上突破或向下延伸時的觸發條件、造市商對沖行為變化，以及下一道極限封頂 / 止跌目標位。
+   - **🛡️ 劇本 C（極端風控劇本，標註機率 %）**：給出結構反轉的破位扳機點（Trigger）與嚴格停損退守位置。
 
 ---
 
@@ -111,9 +124,10 @@ $$\Delta\text{IV}_K = \text{IV}_{K, t} - \text{IV}_{K, t-1}$$
 
 網頁必須為單一獨立 HTML 檔（使用原生 SVG 繪圖，無外部 CDN 依賴，確保在本地端、沙盒預覽與 GitHub Pages 皆能 100% 正常渲染）：
 
-1. **頂部控制列**：
-   - 顯示當前快照日期、編號（如 `Snapshot #001`）、SPX 現價、Gamma Regime 狀態燈（🟢 正 Gamma 穩定區 / 🔴 負 Gamma 加速區）。
+1. **頂部控制列與「🎯 對應 ES 期貨點位」一鍵切換**：
+   - 顯示當前快照日期、編號（如 `Snapshot #010`）、SPX 現價、Gamma Regime 狀態燈（🟢 正 Gamma 穩定區 / 🔴 負 Gamma 加速區）。
    - **ES 期貨價差換算器 (`ES Basis`)**：輸入框即時連動全網頁所有點位顯示 `ES 目標價`。
+   - **🎯 對應 ES 期貨點位切換按鈕 (`toggleESMode`)**：點擊後，將全網頁五大卡片、雙圖表 X 軸與標記線、左側報價梯，以及**右側 AI 實戰報告內所有 `<code>7XXX</code>` 點位自動加上 `[ES XXXX]` 期貨點位換算**（並記憶於 `localStorage`）。
    - **主題切換按鈕**：`☀️ 白底模式 (Barchart)` vs. `🌙 黑底模式 (夜盤)`（自動記憶至 `localStorage`）。
 2. **五大關鍵點位卡片列**：並排顯示 `GAMMA FLIP`、`CALL WALL`、`PUT TRIGGER`、`PUT OI WALL`、`KING PIN`（含 SPX 點位、ES 換算點位、GEX 規模與操作提示）。
 3. **Barchart 風格雙圖表區（支援左右並排 / 上下大圖切換，及 Volume vGEX / OI GEX 切換）**：
@@ -125,8 +139,12 @@ $$\Delta\text{IV}_K = \text{IV}_{K, t} - \text{IV}_{K, t-1}$$
      - 對稱拆解垂直柱狀圖（左軸）：同一履約價上方畫 `Call Gamma Exposure`（寶藍向上），下方畫 `Put Gamma Exposure`（橘黃向下）。
      - 磁吸曲線（左軸）：`Absolute Exposure`（`Call + |Put|` 總磁吸強度紫色虛線 `#8b5cf6`，可點擊圖例開關）。
      - 垂直標記線：`Last Price`（深綠實線）。
-4. **左下角：報價梯明細表 (`Strike Ladder`)**：由高到低排列，內含水平双向能量條、增量欄位與 `IV (%)` 最低谷 `❄️` 驗真標記。
-5. **右下角：AI 實戰量化分析報告**：自動生成「1️⃣ 造市商底牌驗真」、「2️⃣ 當下 ES/SPX 實戰作戰劇本（含多空點位與尾盤收斂目標）」、「3️⃣ 盤中前後快照增量對比」。
+4. **左下角：報價梯明細表 (`Strike Ladder`)**：由高到低排列，內含水平雙向能量條、增量欄位與 `IV (%)` 最低谷 `❄️` 驗真標記。
+5. **右下角：AI 實戰量化分析報告（必須完整包含四大核心區塊）**：
+   - **1️⃣ 造市商底牌驗真（IV Skew 照妖鏡）**
+   - **2️⃣ 當下需要注意什麼 & 接下來劇本推演與關鍵點位（劇本 A / B / C）**：直接渲染 `SNAPSHOT.playbook_html`，完整呈現「⚠️ 一、當下最需要注意的實戰關鍵」與「📈 二、接下來劇本推演與關鍵點位（劇本 A 主劇本 / 劇本 B 次劇本 / 劇本 C 下檔風控劇本，含機率 %、走勢路徑、關鍵點位與具體操作策略）」，並支援點擊「對應 ES」自動換算全文點位。
+   - **3️⃣ 盤中前後快照增量對比 ($\Delta\text{Volume}$ & $\Delta\text{IV}$)**：渲染 `SNAPSHOT.delta_summary.html_summary`。
+   - **📌 當期重點觀察與行情複盤**：渲染 `SNAPSHOT.extra_notes_html`。
 
 ---
 
