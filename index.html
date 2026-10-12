@@ -1260,9 +1260,8 @@ function renderDashboard() {
     if (!rawHtml) return '';
     if (!showES) return rawHtml;
     return rawHtml.replace(/<code>([^<]+)<\/code>/g, (match, inner) => {
-      // If inner contains 4-digit SPX levels (7000-8500) and doesn't already have ES
       if (inner.includes('ES') || inner.includes('#') || inner.includes('%') || inner.includes('$')) return match;
-      const replaced = inner.replace(/(7\d{3}(?:\.\d+)?)/g, (m, numStr) => {
+      const replaced = inner.replace(/\b(7\d{3}(?:\.\d+)?)\b/g, (m, numStr) => {
         const val = parseFloat(numStr);
         if (val < 7000 || val > 8500) return m;
         const esVal = val + basis;
