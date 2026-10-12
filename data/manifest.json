@@ -2,11 +2,16 @@
   "project": "SPX / ES 3-Layer GEX Quant Dashboard",
   "total_snapshots": 1,
   "latest": {
-    "date": "2026-09-01",
+    "date": "2026-10-12",
     "seq": 1,
-    "spot": 7638.66,
-    "raw_csv": "data/2026-09-01/20260901_001_spot7638.66_raw.csv",
-    "calc_json": "data/2026-09-01/20260901_001_spot7638.66_calc.json"
+    "spot": 7811.09,
+    "raw_csv": "data/2026-10-12/20261012_001_spot7811.09_raw.csv",
+    "calc_json": "data/2026-10-12/20261012_001_spot7811.09_calc.json",
+    "gamma_flip": 7820,
+    "call_wall": 7840,
+    "put_trigger": 7800,
+    "put_oi_wall": 7750,
+    "king_pin": 7815
   },
   "history": [
     {
@@ -20,6 +25,20 @@
       "king_pin": 7650,
       "raw_csv": "data/2026-09-01/20260901_001_spot7638.66_raw.csv",
       "calc_json": "data/2026-09-01/20260901_001_spot7638.66_calc.json"
+    }
+  ],
+  "snapshots": [
+    {
+      "date": "2026-10-12",
+      "seq": 1,
+      "spot": 7811.09,
+      "raw_csv": "data/2026-10-12/20261012_001_spot7811.09_raw.csv",
+      "calc_json": "data/2026-10-12/20261012_001_spot7811.09_calc.json",
+      "gamma_flip": 7820,
+      "call_wall": 7840,
+      "put_trigger": 7800,
+      "put_oi_wall": 7750,
+      "king_pin": 7815
     }
   ]
 }
