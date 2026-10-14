@@ -1,7 +1,7 @@
 {
   "project": "SPX / ES 3-Layer GEX Quant Dashboard",
   "total_snapshots": 1,
-  "latest": "data/2026-10-14/20261014_005_spot7739.09_calc.json",
+  "latest": "data/2026-10-14/20261014_006_spot7720.20_calc.json",
   "history": [
     {
       "date": "2026-09-01",
@@ -17,6 +17,17 @@
     }
   ],
   "snapshots": [
+    {
+      "date": "2026-10-14",
+      "seq": 6,
+      "spot": 7720.2,
+      "raw_csv": "data/2026-10-14/20261014_006_spot7720.20_raw.csv",
+      "calc_json": "data/2026-10-14/20261014_006_spot7720.20_calc.json",
+      "gamma_flip": 7755,
+      "call_wall": 7760,
+      "put_trigger": 7720,
+      "king_pin": 7720
+    },
     {
       "date": "2026-10-14",
       "seq": 5,
