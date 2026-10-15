@@ -3,15 +3,15 @@
   "total_snapshots": 1,
   "latest": {
     "date": "2026-10-15",
-    "seq": "001",
-    "spot": 7697.89,
-    "raw_csv": "data/2026-10-15/20261015_001_spot7697.89_raw.csv",
-    "calc_json": "data/2026-10-15/20261015_001_spot7697.89_calc.json",
+    "seq": "002",
+    "spot": 7698.86,
+    "raw_csv": "data/2026-10-15/20261015_002_spot7698.86_raw.csv",
+    "calc_json": "data/2026-10-15/20261015_002_spot7698.86_calc.json",
     "gamma_flip": 7695,
     "call_wall": 7720,
     "put_trigger": 7650,
     "king_pin": 7700,
-    "net_vgex_b": 21.39
+    "net_vgex_b": 28.08
   },
   "history": [
     {
@@ -28,6 +28,18 @@
     }
   ],
   "snapshots": [
+    {
+      "date": "2026-10-15",
+      "seq": "002",
+      "spot": 7698.86,
+      "raw_csv": "data/2026-10-15/20261015_002_spot7698.86_raw.csv",
+      "calc_json": "data/2026-10-15/20261015_002_spot7698.86_calc.json",
+      "gamma_flip": 7695,
+      "call_wall": 7720,
+      "put_trigger": 7650,
+      "king_pin": 7700,
+      "net_vgex_b": 28.08
+    },
     {
       "date": "2026-10-15",
       "seq": "001",
