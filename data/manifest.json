@@ -11,7 +11,7 @@
     "king_pin": 7665,
     "raw_csv": "data/2026-10-16/20261016_006_spot7658.74_raw.csv",
     "calc_json": "data/2026-10-16/20261016_006_spot7658.74_calc.json",
-    "updated_at": "2026-10-17T01:17:06Z"
+    "updated_at": "2026-10-17T07:51:39Z"
   },
   "history": [
     {
@@ -38,7 +38,7 @@
       "king_pin": 7665,
       "raw_csv": "data/2026-10-16/20261016_006_spot7658.74_raw.csv",
       "calc_json": "data/2026-10-16/20261016_006_spot7658.74_calc.json",
-      "updated_at": "2026-10-17T01:17:06Z"
+      "updated_at": "2026-10-17T07:51:39Z"
     },
     {
       "date": "2026-10-16",
@@ -438,5 +438,5 @@
       "king_pin": 7810
     }
   ],
-  "updated_at": "2026-10-17T01:17:06Z"
+  "updated_at": "2026-10-17T07:51:39Z"
 }
