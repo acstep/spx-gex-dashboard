@@ -9,7 +9,9 @@
 2. 📄 **[`SPX_GEX_AI_Analysis_Prompt_Only.md`](./SPX_GEX_AI_Analysis_Prompt_Only.md)**  
    - **純 AI 量化解盤專用 Prompt（不含 GitHub 流程）**：可直接複製貼給任何 AI（ChatGPT / Claude / Gemini 等），貼上 IBKR 選擇權鏈即可產出「五大關鍵點位 + 造市商 IV 底牌驗真 + ES/SPX 實戰劇本 + 盤中增量資金流對比」。
 3. 📓 **[`SPX_GEX_Prediction_Error_Log_and_Correction_Ledger.md`](./SPX_GEX_Prediction_Error_Log_and_Correction_Ledger.md)**  
-   - **歷史預測錯題本與持續修正總帳**：完整記錄過去 6 個交易日（37 筆快照 / 31 次盤中推進）中所有曾經預測失誤的 16 筆快照、當時看錯的微觀指標、真實走勢對照，以及「盤中逐筆對帳、連錯即斬」的持續修正規範。
+   - **歷史預測錯題本與持續修正總帳**：完整記錄過去 6 個交易日（37 筆快照 / 31 次盤中推進）中所有曾經預測失誤的 16 筆快照、AI 大數據模型五大先天缺陷與「五不亂說戒律」、跨日皮爾森統計回歸基準表，以及「盤中逐筆對帳、連錯即斬」的持續修正規範。
+4. 🧮 **[`run_gex_regression_audit.py`](./run_gex_regression_audit.py)**  
+   - **每日/每筆自動量化回歸檢驗與自我對帳引擎**：自動掃描 `data/` 下全部歷史快照，計算 7 大微觀因子與下一筆漲跌 (`dSpot`) 之相關係數 ($r$)，檢驗五大定量盤態分類器命中率，並為最新一筆快照輸出「強制盤態鎖定 (Mandatory Regime Lock)」。
 
 ---
 
