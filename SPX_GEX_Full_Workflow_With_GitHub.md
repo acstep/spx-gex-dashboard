@@ -159,6 +159,13 @@ $$\Delta\text{IV}_K = \text{IV}_{K, t} - \text{IV}_{K, t-1}$$
    - **「連錯即斬」硬性規定**：若上一筆 `#N-1` 的 `劇本 A` 預測守穩支撐 V 轉向上，但 `#N` 實際跌破該支撐（$\Delta\text{Spot} < -3\text{ 點}$）且單筆增量 $\Delta\text{vGEX}_{\text{inc}} < 0$（或腳下 `Below20_d(C-P) < 0`），**在第 `#N` 筆報告中必須立刻承認前筆支撐已破位，並強制將 `#N` 的 `劇本 A` 切換為順勢空頭/下移支撐**，嚴禁像過去在 `10/13`、`10/14`、`10/16` 那樣把支撐往下挪 10 點後又連續喊第 2、3、4 次 V 轉！
    - **錯題持續入庫**：所有歷史與未來預測偏差皆永久記錄於專案根目錄之 **`SPX_GEX_Prediction_Error_Log_and_Correction_Ledger.md`（歷史預測錯題本與持續修正總帳）**，任何新發現之失誤型態必須持續追加至錯題本並更新本鐵律。
 
+#### 🧠 附錄：為什麼大數據訓練過的 AI 會犯錯？——「AI 五大先天缺陷與五不亂說戒律」
+1. **🚫 戒律一（破除預訓練多頭敘事偏見）**：通用 AI 讀過太多美股牛市「Buy the Dip」文章，本能愛把 V 轉寫進 `劇本 A`。**嚴禁憑語言習慣預設逢低必彈！** `劇本 A` 方向必須 100% 服從 `run_gex_regression_audit.py` 的定量盤態鎖定結果！
+2. **🚫 戒律二（破除教科書死規則 vs. 0DTE 實盤落差）**：0DTE 暴跌時，上方深度價內 Put 無人交易、只剩廉價 Call 彩票單，且機構常做 Bear Put Spread 壓低左翼 IV。**嚴禁拿遠端 `ΔCall > ΔPut` 或近端 `ΔPut` 暴增時的左翼微縮波亂說成主力抄底！**
+3. **🚫 戒律三（破除平面視覺平均盲區）**：跨日全樣本皮爾森回歸證實，與下一筆漲跌 `dSpot` 相關性最高的是 **第 1 名：`腳下 20 點淨曝險 Below20_vGEX` ($r = +0.5212$)** 與 **第 2 名：`單筆 Gamma 加權增量 Inc_vGEX` ($r = +0.5035$)**；而 `頭頂 20 點 Above20_vGEX` 相關性墊底 ($r = +0.3508$)。**嚴禁因上方遠處整排翻藍而忽略腳下高 Gamma 負值黑洞！**
+4. **🚫 戒律四（破除 AI 確認偏誤與硬拗慣性）**：**嚴禁在上一筆看多被打臉後，下一筆找藉口把支撐往下挪 10 點繼續喊 V 轉！**
+5. **🚫 戒律五（破除跨日上下文記憶幻覺）**：**嚴禁在未執行 `run_gex_regression_audit.py` 查核 `data/` 真實數據前，憑印象引用任何歷史日期走勢**（如誤稱 `10/14` 有 V 轉，實則 `10/14` 全日單邊收最低 `7720.20`）！
+
 ---
 
 ## 四、 互動網頁儀表板 (`index.html`) 視覺與功能規格
@@ -202,6 +209,8 @@ $$\Delta\text{IV}_K = \text{IV}_{K, t} - \text{IV}_{K, t-1}$$
   ├── README.md                                          # 專案說明與歷史快照索引表
   ├── SPX_GEX_Full_Workflow_With_GitHub.md               # 本完整工作流 SOP 文件（不含任何 Token）
   ├── SPX_GEX_AI_Analysis_Prompt_Only.md                 # 純 AI 分析專用 Prompt 文件（不含 GitHub 與 Token）
+  ├── SPX_GEX_Prediction_Error_Log_and_Correction_Ledger.md # 歷史預測錯題本與持續修正總帳
+  ├── run_gex_regression_audit.py                        # 每日/每筆自動量化回歸檢驗與自我對帳引擎腳本
   └── data/
       ├── manifest.json                                  # 所有歷史上傳快照的總索引清單
       └── YYYY-MM-DD/                                    # 依交易日期分資料夾保存
@@ -215,16 +224,18 @@ $$\Delta\text{IV}_K = \text{IV}_{K, t} - \text{IV}_{K, t-1}$$
 當使用者在對話中貼上新的選擇權鏈數據或截圖時，AI 必須自動執行以下動作：
 
 1. **解析與驗證數據**：提取日期 `YYYY-MM-DD`、現價 `Spot` 與所有履約價之 Greeks / Volume / OI。
-2. **檢查當日流水號 (`SEQ`)**：
+2. **檢查當日流水號 (`SEQ`) 與前筆對帳**：
    - 讀取 `data/manifest.json`（或查詢 GitHub API `contents/data/YYYY-MM-DD`），找出當日已有幾筆快照，將新快照編號設為 `SEQ = N + 1`（格式化為 3 位數，如 `001`、`002`、`003`）。
-   - 若當日已有前一筆快照 `SEQ - 1`，自動讀取前一筆 `_calc.json`，計算每個履約價的 `dcvol` ($\Delta\text{CallVol}$)、`dpvol` ($\Delta\text{PutVol}$)、`dnet_vol` 與 `div` ($\Delta\text{IV}$)。
-3. **寫入歸檔檔案（嚴禁覆蓋歷史檔案）**：
+   - 若當日已有前一筆快照 `SEQ - 1`，自動讀取前一筆 `_calc.json`，計算每個履約價的 `dcvol` ($\Delta\text{CallVol}$)、`dpvol` ($\Delta\text{PutVol}$)、`dnet_vol` 與 `div` ($\Delta\text{IV}$)，**並對帳上一筆 `SEQ - 1` 的 `劇本 A` 預測是否與真實走勢相符（若不符則強制觸發「鐵律七：連錯即斬」並記錄至錯題本）**。
+3. **執行跨日全樣本量化回歸與盤態鎖定 (`run_gex_regression_audit.py`)**：
+   - 執行 `python3 /home/user/run_gex_regression_audit.py`，檢視全歷史樣本之回歸係數 (`Below20_vGEX`, `Inc_vGEX`) 與最新一筆快照之 **「強制盤態鎖定 (Mandatory Regime Lock)」**，確保撰寫之 `劇本 A` 方向 100% 符合定量回歸結果，嚴禁主觀亂說！
+4. **寫入歸檔檔案（嚴禁覆蓋歷史檔案）**：
    - 產生 `data/YYYY-MM-DD/YYYYMMDD_SEQ_spotXXXX.XX_raw.csv`
    - 產生 `data/YYYY-MM-DD/YYYYMMDD_SEQ_spotXXXX.XX_calc.json`
    - 更新 `data/manifest.json` 與根目錄 `latest.json`
-4. **重新編譯 `index.html`**：
+5. **重新編譯 `index.html`**：
    - 將最新一筆 `SNAPSHOT` JSON 內嵌至 `index.html` 中，確保打開網頁即直接呈現最新一期圖表與分析報告。
-5. **推送至 GitHub（安全規範）**：
+6. **推送至 GitHub（安全規範）**：
    - 使用環境變數 `$GITHUB_TOKEN` 透過 Git 或 GitHub REST API (`PUT /repos/acstep/spx-gex-dashboard/contents/...`) 上傳檔案。
    - ⚠️ **嚴格安全守則**：任何提交至 GitHub 的程式碼、Markdown 或 JSON 檔案中，**絕對不可包含任何真實 Personal Access Token 或私密金鑰字串**！
 
@@ -232,6 +243,6 @@ $$\Delta\text{IV}_K = \text{IV}_{K, t} - \text{IV}_{K, t-1}$$
 
 ## 六、 在新對話視窗一鍵啟動之話術（Copy-Paste 啟動指令）
 
-當你開啟一個全新的 AI 對話視窗時，只需把這份檔案丟給 AI，並說：
+當你開啟一個全新的 AI 對話視窗時，只需把這份檔案與 `SPX_GEX_Prediction_Error_Log_and_Correction_Ledger.md` 丟給 AI，並說：
 
-> **「請讀取這份 `SPX_GEX_Full_Workflow_With_GitHub.md` 作為你的系統規範。接下來我每次貼上或上傳 IBKR 的 SPX/ES 選擇權鏈數據，請自動幫我：1. 完成三層 GEX + IV 驗真分析與實戰劇本；2. 將 raw.csv 與 calc.json 按流水號歸檔至 `acstep/spx-gex-dashboard` 的 `/data/YYYY-MM-DD/` 目錄；3. 更新 `index.html` 只顯示最新一期雙圖表儀表板並推送到 GitHub Pages。」**
+> **「請讀取這份 `SPX_GEX_Full_Workflow_With_GitHub.md` 與《歷史預測錯題本》作為你的系統規範。接下來我每次貼上或上傳 IBKR 的 SPX/ES 選擇權鏈數據，請自動幫我：1. 先跑 `run_gex_regression_audit.py` 對帳上一筆預測並鎖定當下定量盤態（嚴格遵守七大鐵律與五不亂說戒律，絕不逆勢硬拗 V 轉）；2. 完成三層 GEX + IV 驗真分析與實戰劇本；3. 將 raw.csv 與 calc.json 按流水號歸檔至 `acstep/spx-gex-dashboard` 的 `/data/YYYY-MM-DD/` 目錄；4. 更新 `index.html` 只顯示最新一期雙圖表儀表板並推送到 GitHub Pages。」**
