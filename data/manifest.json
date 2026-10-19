@@ -448,6 +448,18 @@
       "put_trigger": 7690,
       "raw_csv": "data/2026-10-19/20261019_001_spot7702.69_raw.csv",
       "calc_json": "data/2026-10-19/20261019_001_spot7702.69_calc.json"
+    },
+    {
+      "date": "2026-10-19",
+      "seq": "002",
+      "spot": 7728.91,
+      "tot_vgex_b": 142.92,
+      "gamma_flip": 7705,
+      "king_pin": 7720,
+      "call_wall": 7730,
+      "put_trigger": 7690,
+      "raw_csv": "data/2026-10-19/20261019_002_spot7728.91_raw.csv",
+      "calc_json": "data/2026-10-19/20261019_002_spot7728.91_calc.json"
     }
   ],
   "updated_at": "2026-10-17T07:52:17Z"
