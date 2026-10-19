@@ -87,7 +87,7 @@ def compute_snapshot_metrics(snap: Dict[str, Any]) -> Dict[str, Any]:
         regime_code = "R4_POS_GAMMA_MEAN_REVERT"
         regime_name = "🧲 盤態4：全正Gamma高檔超漲均值回歸局 (Revert to KP)"
         expected_dir = "BEAR_OR_PIN"
-    elif inc_vgex < 0 or (spot < flip and below20_dnet < -3000) or (below20_vgex <= -15.0 and below20_dnet <= -4000):
+    elif inc_vgex < 0 or (spot < flip and below20_dnet < -3000):
         regime_code = "R3_BELOW_FLIP_SINKHOLE"
         regime_name = "🟠 盤態3：分水嶺下沿黑洞擴大/增量轉空回踩局 (Pullback/Breakdown)"
         expected_dir = "BEAR"
