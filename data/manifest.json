@@ -436,6 +436,18 @@
       "put_trigger": 7805,
       "put_oi_wall": 7750,
       "king_pin": 7810
+    },
+    {
+      "date": "2026-10-19",
+      "seq": "001",
+      "spot": 7702.69,
+      "tot_vgex_b": 2.35,
+      "gamma_flip": 7700,
+      "king_pin": 7700,
+      "call_wall": 7720,
+      "put_trigger": 7690,
+      "raw_csv": "data/2026-10-19/20261019_001_spot7702.69_raw.csv",
+      "calc_json": "data/2026-10-19/20261019_001_spot7702.69_calc.json"
     }
   ],
   "updated_at": "2026-10-17T07:52:17Z"
