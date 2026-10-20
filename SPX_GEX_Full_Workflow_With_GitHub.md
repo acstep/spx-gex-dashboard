@@ -229,14 +229,16 @@ $$\Delta\text{IV}_K = \text{IV}_{K, t} - \text{IV}_{K, t-1}$$
    - 若當日已有前一筆快照 `SEQ - 1`，自動讀取前一筆 `_calc.json`，計算每個履約價的 `dcvol` ($\Delta\text{CallVol}$)、`dpvol` ($\Delta\text{PutVol}$)、`dnet_vol` 與 `div` ($\Delta\text{IV}$)，**並對帳上一筆 `SEQ - 1` 的 `劇本 A` 預測是否與真實走勢相符（若不符則強制觸發「鐵律七：連錯即斬」並記錄至錯題本）**。
 3. **執行跨日全樣本量化回歸與盤態鎖定 (`run_gex_regression_audit.py`)**：
    - 執行 `python3 /home/user/run_gex_regression_audit.py`，檢視全歷史樣本之回歸係數 (`Below20_vGEX`, `Inc_vGEX`) 與最新一筆快照之 **「強制盤態鎖定 (Mandatory Regime Lock)」**，確保撰寫之 `劇本 A` 方向 100% 符合定量回歸結果，嚴禁主觀亂說！
+   - **嚴格執行【鐵律八：全場最低 IV 碗底 (`Min IV Bowl`) 與 `Call Wall` 階梯移動定律】**：當 `Spot > Gamma Flip` 且 `Loc15_vGEX > 0` 時，即使腳下 `Below20_vGEX < 0`（實為多頭保護墊），指數必順正 Gamma 階梯衝向上方最低 IV 碗底（嚴禁誤判為盤態 3）；當 `Spot < Gamma Flip` 且最低 IV 碗底隨時間階梯下移（如 `7740 ➔ 7735 ➔ 7730 ➔ 7720 ➔ 7715`），代表機構賣 Call 鐵蓋正往下壓，嚴禁逆勢抄底看 V 轉！
+   - **嚴禁事後美化對帳戰績**：若盤中曾因人為干預改口看錯（如 `10/19 #001`），後續快照對帳表必須誠實記為 `❌ 失誤`，不得以恢復後的模型結果掩蓋實盤改口失誤。
 4. **寫入歸檔檔案（嚴禁覆蓋歷史檔案）**：
    - 產生 `data/YYYY-MM-DD/YYYYMMDD_SEQ_spotXXXX.XX_raw.csv`
    - 產生 `data/YYYY-MM-DD/YYYYMMDD_SEQ_spotXXXX.XX_calc.json`
    - 更新 `data/manifest.json` 與根目錄 `latest.json`
 5. **重新編譯 `index.html`**：
    - 將最新一筆 `SNAPSHOT` JSON 內嵌至 `index.html` 中，確保打開網頁即直接呈現最新一期圖表與分析報告。
-6. **推送至 GitHub（安全規範）**：
-   - 使用環境變數 `$GITHUB_TOKEN` 透過 Git 或 GitHub REST API (`PUT /repos/acstep/spx-gex-dashboard/contents/...`) 上傳檔案。
+6. **推送至 GitHub（單一原子提交 Atomic Commit ＋ 安全規範）**：
+   - 使用環境變數 `$GITHUB_TOKEN` 透過 Git Trees API 將當筆 `_raw.csv`、`_calc.json`、`data/manifest.json`、`latest.json` 與 `index.html` 打包為**單一原子 Commit** 推送至 `acstep/spx-gex-dashboard`，避免連續多次 `PUT /contents/` 觸發 GitHub Pages 重複取消構建。
    - ⚠️ **嚴格安全守則**：任何提交至 GitHub 的程式碼、Markdown 或 JSON 檔案中，**絕對不可包含任何真實 Personal Access Token 或私密金鑰字串**！
 
 ---
