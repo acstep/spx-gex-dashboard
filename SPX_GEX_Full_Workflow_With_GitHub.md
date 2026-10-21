@@ -230,6 +230,9 @@ $$\Delta\text{IV}_K = \text{IV}_{K, t} - \text{IV}_{K, t-1}$$
 3. **執行跨日全樣本量化回歸與盤態鎖定 (`run_gex_regression_audit.py`)**：
    - 執行 `python3 /home/user/run_gex_regression_audit.py`，檢視全歷史樣本之回歸係數 (`Below20_vGEX`, `Inc_vGEX`) 與最新一筆快照之 **「強制盤態鎖定 (Mandatory Regime Lock)」**，確保撰寫之 `劇本 A` 方向 100% 符合定量回歸結果，嚴禁主觀亂說！
    - **嚴格執行【鐵律八：全場最低 IV 碗底 (`Min IV Bowl`) 與 `Call Wall` 階梯移動定律】**：當 `Spot > Gamma Flip` 且 `Loc15_vGEX > 0` 時，即使腳下 `Below20_vGEX < 0`（實為多頭保護墊），指數必順正 Gamma 階梯衝向上方最低 IV 碗底（嚴禁誤判為盤態 3）；當 `Spot < Gamma Flip` 且最低 IV 碗底隨時間階梯下移（如 `7740 ➔ 7735 ➔ 7730 ➔ 7720 ➔ 7715`），代表機構賣 Call 鐵蓋正往下壓，嚴禁逆勢抄底看 V 轉！
+   - **嚴格執行【鐵律九：高正 Gamma 雙向飽和均值回歸 (`R4`) 與早盤 Call Skew 搶籌預警（`2026-10-20` 實盤驗證）】**：
+     1. **高正 Gamma 雙向飽和均值回歸 (`R4_POS_GAMMA_MEAN_REVERT`)**：當全場 `Tot_vGEX > +$100B`、`Above20_vGEX > 0`，且滿足 `Spot >= King_Pin + 4.0` 或 **`Below20_vGEX > +$50B`（大漲後腳下 20 點正 Gamma 高度飽和）** 時，歷史 8 日 41 次推進中出現 5 次 **100.0% 下一筆橫盤或壓回下檔磁王**（平均 `-7.78 點`）！尤其當單筆 `Inc_vGEX` 較前筆驟降 >80% 且腳下 `Below20_dNet < -10,000`（機構買 Put 鎖利）時，必須強制鎖定為 `🧲 盤態 4 (BEAR_OR_PIN)` 高檔均值回歸回踩下檔磁王，嚴禁再機械式追高！
+     2. **早盤淺碟負 Gamma 之右翼 Call Skew 搶籌預警**：當早盤 `Tot_Pin < $80B`、`|Tot_vGEX| < $10B` 且指數小跌，若右翼價外 Call IV (`dIV`) 漲幅達左翼 Put IV 漲幅的 2~4 倍並伴隨數萬口價外 Call 淨買盤，代表機構正趁回檔大買價外 Call，一旦站回 `Gamma Flip` 立即啟動 Vanna 軋空劇本！
    - **嚴禁事後美化對帳戰績**：若盤中曾因人為干預改口看錯（如 `10/19 #001`），後續快照對帳表必須誠實記為 `❌ 失誤`，不得以恢復後的模型結果掩蓋實盤改口失誤。
 4. **寫入歸檔檔案（嚴禁覆蓋歷史檔案）**：
    - 產生 `data/YYYY-MM-DD/YYYYMMDD_SEQ_spotXXXX.XX_raw.csv`

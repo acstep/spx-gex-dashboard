@@ -83,7 +83,7 @@ def compute_snapshot_metrics(snap: Dict[str, Any]) -> Dict[str, Any]:
         regime_code = "R2_LATE_MEGA_PIN"
         regime_name = "📌 盤態2：尾盤多座巨型磁王水泥釘死局 (Pinning)"
         expected_dir = "PIN"
-    elif below20_vgex > 0 and above20_vgex > 0 and spot >= kp + 4.0 and tot_vgex > 100.0:
+    elif below20_vgex > 0 and above20_vgex > 0 and tot_vgex > 100.0 and (spot >= kp + 4.0 or below20_vgex > 50.0):
         regime_code = "R4_POS_GAMMA_MEAN_REVERT"
         regime_name = "🧲 盤態4：全正Gamma高檔超漲均值回歸局 (Revert to KP)"
         expected_dir = "BEAR_OR_PIN"
