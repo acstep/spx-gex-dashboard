@@ -46,6 +46,7 @@ def compute_snapshot_metrics(snap: Dict[str, Any]) -> Dict[str, Any]:
     mult_m = spot * spot * 0.01 * 100 / 1e6
 
     tot_vgex = sum(r.get("vol_vgex", 0.0) for r in rows) / 1000.0
+    tot_pin = sum(r.get("pin_vgex", 0.0) for r in rows) / 1000.0
     loc15_vgex = sum(r.get("vol_vgex", 0.0) for r in rows if abs(r.get("strike", 0) - spot) <= 15.0) / 1000.0
     below20_rows = [r for r in rows if -20.0 <= (r.get("strike", 0) - spot) <= 2.0]
     above20_rows = [r for r in rows if 2.0 < (r.get("strike", 0) - spot) <= 20.0]
@@ -54,7 +55,9 @@ def compute_snapshot_metrics(snap: Dict[str, Any]) -> Dict[str, Any]:
     above20_vgex = sum(r.get("vol_vgex", 0.0) for r in above20_rows) / 1000.0
     below20_dnet = sum(r.get("dcvol", 0) - r.get("dpvol", 0) for r in below20_rows)
     above20_dnet = sum(r.get("dcvol", 0) - r.get("dpvol", 0) for r in above20_rows)
-    ntm25_dnet = sum(r.get("dcvol", 0) - r.get("dpvol", 0) for r in rows if abs(r.get("strike", 0) - spot) <= 25.0)
+    ntm25_rows = [r for r in rows if abs(r.get("strike", 0) - spot) <= 25.0]
+    ntm25_dnet = sum(r.get("dcvol", 0) - r.get("dpvol", 0) for r in ntm25_rows)
+    avg_div = sum(r.get("div", 0.0) for r in ntm25_rows) / max(1, len(ntm25_rows))
 
     inc_vgex = sum((r.get("dcvol", 0) - r.get("dpvol", 0)) * r.get("gamma", 0.0) * mult_m for r in rows) / 1000.0
 
@@ -69,12 +72,17 @@ def compute_snapshot_metrics(snap: Dict[str, Any]) -> Dict[str, Any]:
     # Count how many strikes within Spot ± 10 have Pin >= $50B
     mega_pins_near = sum(1 for r in rows if abs(r.get("strike", 0) - spot) <= 10.0 and (r.get("pin_vgex", 0.0) / 1000.0) >= 50.0)
 
-    # Quantitative 5-Regime Classification
+    # Quantitative 5-Regime Classification (including Law 10A/10B/10C from 2026-10-21 post-close audit)
     if below20_vgex < 0 and above20_vgex < 0:
         if mega_pins_near >= 2 and abs(spot - kp) <= 6.0 and inc_vgex > -65.0:
             regime_code = "R2_LATE_MEGA_PIN"
             regime_name = "📌 盤態2：尾盤多座巨型磁王水泥釘死局 (Pinning)"
             expected_dir = "PIN"
+        # Law 10B: Shallow Neg Gamma Oversold Snapback to Overhead KP (Tot_vGEX > -40B & KP - Spot >= 10 pts)
+        elif tot_vgex > -40.0 and (kp - spot) >= 10.0:
+            regime_code = "R5_BULL_PUSH_OR_BASE"
+            regime_name = "🟢 盤態5：正Gamma多頭推升/換手築底局 (Bull Push/Base)"
+            expected_dir = "BULL"
         else:
             regime_code = "R1_DEEP_NEG_WATERFALL"
             regime_name = "🔴 盤態1：深水負Gamma單邊殺盤局 (Bear Waterfall)"
@@ -87,10 +95,21 @@ def compute_snapshot_metrics(snap: Dict[str, Any]) -> Dict[str, Any]:
         regime_code = "R4_POS_GAMMA_MEAN_REVERT"
         regime_name = "🧲 盤態4：全正Gamma高檔超漲均值回歸局 (Revert to KP)"
         expected_dir = "BEAR_OR_PIN"
-    elif inc_vgex < 0 or (spot < flip and below20_dnet < -3000):
+    # Law 10A: Early thin-pin hollow floor above KP (Tot_Pin < 80B, Tot_vGEX < 10B, Below20 < 0, Below20_dNet < 0, Spot >= KP + 5)
+    elif tot_pin < 80.0 and tot_vgex < 10.0 and below20_vgex < 0 and below20_dnet < 0 and spot >= kp + 5.0:
         regime_code = "R3_BELOW_FLIP_SINKHOLE"
         regime_name = "🟠 盤態3：分水嶺下沿黑洞擴大/增量轉空回踩局 (Pullback/Breakdown)"
         expected_dir = "BEAR"
+    elif inc_vgex < 0 or (spot < flip and below20_dnet < -3000):
+        # Law 10C: Vanna + Call-Chasing Flip Breakout Override (Inc > 0, NTM25 > +8000, Above20_dNet > 1.8*|Below20_dNet|, avg_dIV <= -1.0% or Tot > +25B)
+        if inc_vgex > 0 and ntm25_dnet > 8000 and above20_dnet > 1.8 * abs(below20_dnet) and (avg_div <= -1.0 or tot_vgex > 25.0):
+            regime_code = "R5_BULL_PUSH_OR_BASE"
+            regime_name = "🟢 盤態5：正Gamma多頭推升/換手築底局 (Bull Push/Base)"
+            expected_dir = "BULL"
+        else:
+            regime_code = "R3_BELOW_FLIP_SINKHOLE"
+            regime_name = "🟠 盤態3：分水嶺下沿黑洞擴大/增量轉空回踩局 (Pullback/Breakdown)"
+            expected_dir = "BEAR"
     else:
         regime_code = "R5_BULL_PUSH_OR_BASE"
         regime_name = "🟢 盤態5：正Gamma多頭推升/換手築底局 (Bull Push/Base)"
