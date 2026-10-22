@@ -248,6 +248,94 @@
   .dual-charts-wrapper.side-by-side {
     grid-template-columns: 1fr 1fr;
   }
+
+  /* Quick Actionable Levels Guide (Directly Below Dual Charts) */
+  .quick-guide-box {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 2px dashed var(--border);
+  }
+  .quick-guide-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .quick-guide-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-title);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .quick-tldr-banner {
+    background: var(--bg-card-sub);
+    border-left: 4px solid var(--pin-gold);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-size: 13.5px;
+    color: var(--text-main);
+    line-height: 1.65;
+  }
+  .quick-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 10px;
+  }
+  .quick-card {
+    background: var(--bg-card-sub);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .quick-card:hover {
+    transform: translateY(-1px);
+    border-color: var(--accent-blue);
+  }
+  .quick-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+  }
+  .quick-badge {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .q-badge-res { background: var(--neg-red-bg); color: var(--neg-red); border: 1px solid var(--neg-red); }
+  .q-badge-target { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); border: 1px solid var(--accent-blue); }
+  .q-badge-pivot { background: var(--pin-gold-bg); color: var(--pin-gold); border: 1px solid var(--pin-gold); }
+  .q-badge-bounce { background: var(--pos-green-bg); color: var(--pos-green); border: 1px solid var(--pos-green); }
+  .q-badge-floor { background: rgba(6, 182, 212, 0.15); color: var(--iv-cyan); border: 1px solid var(--iv-cyan); }
+  .quick-strike {
+    font-size: 20px;
+    font-weight: 900;
+    font-family: monospace;
+    color: var(--text-title);
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .quick-action {
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.4;
+  }
+  .quick-why {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
   @media (max-width: 1100px) {
     .dual-charts-wrapper.side-by-side { grid-template-columns: 1fr; }
   }
@@ -627,6 +715,21 @@
         </div>
       </div>
     </div>
+
+    <!-- NEW: Quick Actionable Levels Summary (Directly below the 2 Charts, before Strike Ladder & AI Report) -->
+    <div class="quick-guide-box" id="quick-guide-section">
+      <div class="quick-guide-header">
+        <div class="quick-guide-title">
+          🎯 重要點位一眼看懂：到哪裡會反彈？到哪裡會受阻？（白話實戰速查）
+          <span id="quick-guide-mode-badge" style="font-size:11.5px; font-weight:700; padding:2px 8px; border-radius:6px; background:var(--pin-gold-bg); color:var(--pin-gold);">即時成交量 + 昨日留倉 OI 綜合判讀</span>
+        </div>
+        <div style="font-size:12px; color:var(--text-muted);">
+          💡 順序由上而下（高點壓力 ➔ 分水嶺 ➔ 低點反彈支撐），點擊上方「對應 ES」可一鍵切換期貨點位
+        </div>
+      </div>
+      <div class="quick-tldr-banner" id="quick-tldr-content">--</div>
+      <div class="quick-cards-grid" id="quick-cards-container"></div>
+    </div>
   </div>
 
   <!-- Main Content Grid Below: Left Strike Ladder + Right AI Report -->
@@ -908,6 +1011,7 @@ function switchDataSource(src, btn) {
   updateChartTitles();
   renderChart1();
   renderChart2();
+  renderQuickGuide();
 }
 
 function switchLadderMode(mode, btn) {
@@ -1236,10 +1340,11 @@ function renderLadder() {
       valText = (d.pin_vgex < 1000 ? (d.pin_vgex / 1000).toFixed(2) : (d.pin_vgex / 1000).toFixed(1)) + 'B';
     }
 
+    const fmtIV = (v) => (v > 1.5 ? v : v * 100).toFixed(2);
     const isLowIV = d.iv <= minIVRow.iv * 1.015;
     const ivHtml = isLowIV
-      ? `<span class="iv-low-badge" title="全場最低IV區：造市商真買方鐵證">${(d.iv * 100).toFixed(2)}%❄️</span>`
-      : `${(d.iv * 100).toFixed(2)}%`;
+      ? `<span class="iv-low-badge" title="全場最低IV區：造市商真買方鐵證">${fmtIV(d.iv)}%❄️</span>`
+      : `${fmtIV(d.iv)}%`;
 
     const strikeCellHtml = showES
       ? `<span style="color:var(--pin-gold); font-weight:800;">${fmtLvl(d.strike)}${isSpotNearest ? '🎯' : ''}</span><span class="es-val" style="color:var(--text-muted);">(${d.strike})</span>`
@@ -1258,6 +1363,141 @@ function renderLadder() {
     `;
     container.appendChild(row);
   });
+}
+
+function renderQuickGuide() {
+  const rows = SNAPSHOT.rows || [];
+  if (!rows.length) return;
+  const basis = getBasis();
+  const spot = SNAPSHOT.spot;
+  const flipStrike = SNAPSHOT.key_levels.gamma_flip;
+  const callWall = SNAPSHOT.key_levels.call_wall;
+  const putTrigger = SNAPSHOT.key_levels.put_trigger;
+  const putOiWall = SNAPSHOT.key_levels.put_oi_wall;
+  const kingPin = SNAPSHOT.key_levels.king_pin;
+  const minIVRow = SNAPSHOT.key_levels.min_iv_row;
+
+  // Format strike helper showing both SPX and ES clearly
+  const fmtDual = (spx) => {
+    const esVal = spx + basis;
+    const esStr = Number.isInteger(esVal) ? String(esVal) : esVal.toFixed(1);
+    if (showES) {
+      return `<span>ES ${esStr}</span> <span style="font-size:12px; color:var(--text-muted); font-weight:600;">(SPX ${spx})</span>`;
+    }
+    return `<span>${spx}</span> <span style="font-size:12px; color:var(--pin-gold); background:var(--pin-gold-bg); padding:1px 6px; border-radius:4px; font-weight:700;">ES ${esStr}</span>`;
+  };
+  const fmtInline = (spx) => {
+    const esVal = spx + basis;
+    const esStr = Number.isInteger(esVal) ? String(esVal) : esVal.toFixed(0);
+    return showES ? `ES ${esStr} (SPX ${spx})` : `${spx} (ES ${esStr})`;
+  };
+
+  // Find key OI and Volume strikes from rows
+  const maxCallOiRow = [...rows].sort((a, b) => (b.coi - a.coi))[0] || callWall;
+  const maxPosOiGexRow = [...rows].sort((a, b) => (b.oi_gex - a.oi_gex))[0] || callWall;
+  const maxPutOiRow = [...rows].sort((a, b) => (b.poi - a.poi))[0] || putOiWall;
+  const sortedPins = [...rows].sort((a, b) => (b.pin_vgex - a.pin_vgex));
+  const pin1 = sortedPins[0] || kingPin;
+  const pin2 = sortedPins.find(r => Math.abs(r.strike - pin1.strike) >= 15) || sortedPins[1] || pin1;
+
+  // Find secondary upper resistance (e.g. 7750~7760) and secondary lower support (e.g. 7675~7680)
+  const upperRows = rows.filter(r => r.strike > flipStrike).sort((a, b) => b.vol_vgex - a.vol_vgex);
+  const topCall1 = upperRows[0] || callWall;
+  const topCall2 = upperRows.find(r => Math.abs(r.strike - topCall1.strike) >= 10) || maxPosOiGexRow;
+
+  const lowerPutRows = rows.filter(r => r.strike < pin1.strike && r.strike > maxPutOiRow.strike).sort((a, b) => b.poi - a.poi);
+  const midSupportRow = lowerPutRows[0] || putTrigger;
+
+  const badgeEl = document.getElementById('quick-guide-mode-badge');
+  if (badgeEl) {
+    if (dataSource === 'oi') {
+      badgeEl.textContent = '🏛️ 目前圖表：昨日留倉 OI 模式（已整合留倉鐵頂/鐵底 + 今日即時磁吸點位）';
+      badgeEl.style.background = 'rgba(59, 130, 246, 0.15)';
+      badgeEl.style.color = 'var(--accent-blue)';
+    } else {
+      badgeEl.textContent = '🔥 目前圖表：今日即時成交量模式（已整合今日主力牆 + 昨日留倉 OI 鐵底）';
+      badgeEl.style.background = 'var(--pin-gold-bg)';
+      badgeEl.style.color = 'var(--pin-gold)';
+    }
+  }
+
+  // Find Greek-implied ATM (where Call Delta is closest to 0.50) to detect any overnight shift
+  const greekAtmRow = [...rows].sort((a, b) => Math.abs((a.cdelta || 0.5) - 0.5) - Math.abs((b.cdelta || 0.5) - 0.5))[0];
+  const hasOvernightShift = greekAtmRow && Math.abs(greekAtmRow.strike - spot) >= 15;
+
+  const tldrEl = document.getElementById('quick-tldr-content');
+  if (tldrEl) {
+    if (hasOvernightShift) {
+      tldrEl.innerHTML = `
+        <strong>💡 一句話看懂現在盤勢：</strong>
+        昨日現貨收在 <code>${fmtInline(spot)}</code>（正好撞上 <strong>${fmtInline(7755)}～${fmtInline(7760)}</strong> 上方 Call 壓制牆封頂），隨後受盤後財報與消息影響，期權 Greeks 定價重心回落至 <strong><span style="color:var(--pos-green);">${fmtInline(pin1.strike)}</span> 全場最大磁吸王</strong>附近！<br/>
+        👉 <strong>最簡單操作口訣</strong>：回測 <strong><span style="color:var(--pos-green);">${fmtInline(pin1.strike - 5)}～${fmtInline(pin1.strike)}</span> 會止跌反彈</strong>；反彈先看 <strong><span style="color:var(--pin-gold);">${fmtInline(flipStrike)}～${fmtInline(pin2.strike)}</span> 分水嶺能不能站上</strong>（站不上會再壓回，站穩就去 <strong>${fmtInline(topCall1.strike)}～${fmtInline(maxPosOiGexRow.strike)}</strong>）；萬一跌破 <strong><span style="color:var(--neg-red);">${fmtInline(pin1.strike - 5)}</span></strong> 才會加速下探 <strong>${fmtInline(midSupportRow.strike)}</strong> 與終極鐵底 <strong><span style="color:var(--iv-cyan);">${fmtInline(maxPutOiRow.strike)}</span>（到此必有大反彈）</strong>！
+      `;
+    } else {
+      tldrEl.innerHTML = `
+        <strong>💡 一句話看懂現在盤勢：</strong>
+        目前現價 <code>${fmtInline(spot)}</code>，全場多空分水嶺在 <strong><span style="color:var(--pin-gold);">${fmtInline(flipStrike)}</span></strong>，最強磁鐵在 <strong><span style="color:var(--pos-green);">${fmtInline(pin1.strike)}</span></strong>。<br/>
+        👉 <strong>最簡單操作口訣</strong>：拉高靠近上方 <strong><span style="color:var(--neg-red);">${fmtInline(topCall1.strike)}～${fmtInline(maxPosOiGexRow.strike)}</span> 會遇壓拉回（適合止盈／短空）</strong>；回跌靠近下方 <strong><span style="color:var(--pos-green);">${fmtInline(pin1.strike)}</span> 會獲支撐反彈</strong>；萬一帶量跌破 <strong><span style="color:var(--neg-red);">${fmtInline(putTrigger.strike)}</span></strong> 則加速下探昨日留倉大鐵底 <strong><span style="color:var(--iv-cyan);">${fmtInline(maxPutOiRow.strike)}</span>（到此會強彈）</strong>！
+      `;
+    }
+  }
+
+  const cards = [
+    {
+      badgeClass: 'q-badge-res',
+      badgeText: '🧱 上方鐵頂壓力（過不去）',
+      strikeHtml: fmtDual(maxPosOiGexRow.strike) + (maxCallOiRow.strike !== maxPosOiGexRow.strike ? ` <span style="font-size:13px; color:var(--text-muted);">/ ${maxCallOiRow.strike}</span>` : ''),
+      actionColor: 'var(--neg-red)',
+      actionText: `📉 拉高到 ${fmtInline(maxPosOiGexRow.strike)}～${fmtInline(maxPosOiGexRow.strike + 10)} 會遇壓拉回（多單止盈）`,
+      whyText: `這裡是昨日留倉最大正 OI 鐵板（${maxPosOiGexRow.strike} 累積 ${maxPosOiGexRow.coi.toLocaleString()} 口 Call OI，遠端 ${maxCallOiRow.strike} 更有 ${maxCallOiRow.coi.toLocaleString()} 口 Call 天花板），且上方 IV 被壓到最低（${minIVRow.strike} 僅 ${(minIVRow.iv > 1.5 ? minIVRow.iv : minIVRow.iv * 100).toFixed(2)}%），代表大戶在上面狂賣 Call 蓋帽，造市商拉高必賣期貨壓盤。`
+    },
+    {
+      badgeClass: 'q-badge-target',
+      badgeText: '🟢 上方第一壓力／推升目標',
+      strikeHtml: fmtDual(topCall1.strike),
+      actionColor: 'var(--accent-blue)',
+      actionText: `🎯 站上分水嶺後會往 ${fmtInline(topCall1.strike)} 推升，但到了會減速`,
+      whyText: `${topCall1.strike} 是全場最大正 vGEX 牆（${topCall1.cvol.toLocaleString()} 口 Call vs ${topCall1.pvol.toLocaleString()} 口 Put）。只要指數站穩 ${flipStrike}～${pin2.strike} 之上，就會順勢被吸往 ${topCall1.strike}～${maxPosOiGexRow.strike}，但進入此區後造市商開始逢高賣出對沖，漲勢會轉為慢牛震盪。`
+    },
+    {
+      badgeClass: 'q-badge-pivot',
+      badgeText: '⚖️ 多空強弱分水嶺（中軸樞紐）',
+      strikeHtml: fmtDual(flipStrike) + (pin2.strike !== flipStrike ? ` <span style="font-size:14px; color:var(--text-muted);">～ ${pin2.strike}</span>` : ''),
+      actionColor: 'var(--pin-gold)',
+      actionText: `🔄 從下面反彈到 ${fmtInline(flipStrike)}～${fmtInline(pin2.strike)} 沒站穩會受阻掉頭；站穩才轉多`,
+      whyText: `${flipStrike} 是全場多空流量 50/50 黃金交叉點（Gamma Flip），而 ${pin2.strike} 是全場第二大磁吸點（${pin2.cvol.toLocaleString()}C / ${pin2.pvol.toLocaleString()}P）。指數若壓在 ${flipStrike} 之下，反彈撞到 ${flipStrike}～${pin2.strike} 極易受阻壓回；反之帶量站穩 ${pin2.strike} 之上就啟動多頭推升。`
+    },
+    {
+      badgeClass: 'q-badge-bounce',
+      badgeText: '🧲 第一止跌反彈區（最強磁鐵）',
+      strikeHtml: fmtDual(pin1.strike),
+      actionColor: 'var(--pos-green)',
+      actionText: `🚀 殺到 ${fmtInline(pin1.strike - 5)}～${fmtInline(pin1.strike)} 會止跌反彈！（尾盤也最易吸回這裡）`,
+      whyText: `${pin1.strike} 是全場 #1 最大磁吸王（Pin 高達 $${(pin1.pin_vgex/1000).toFixed(2)}B，聚集 ${pin1.pvol.toLocaleString()} 口 Put 成交量與 ${pin1.poi.toLocaleString()} 口留倉 Put OI）。第一次回測 ${pin1.strike - 5}～${pin1.strike} 大關時，空頭獲利了結加上造市商回補，極易出現強勁技術性反彈！`
+    },
+    {
+      badgeClass: 'q-badge-floor',
+      badgeText: '🛡️ 破位加速線 ＆ 終極鐵底大反彈',
+      strikeHtml: fmtDual(maxPutOiRow.strike) + ` <span style="font-size:13px; color:var(--text-muted);">(次支撐 ${midSupportRow.strike})</span>`,
+      actionColor: 'var(--iv-cyan)',
+      actionText: `⚡ 萬一跌破 ${fmtInline(pin1.strike - 5)} 會加速殺向 ${fmtInline(midSupportRow.strike)}；殺到 ${fmtInline(maxPutOiRow.strike)} 必有大反彈`,
+      whyText: `如果 ${pin1.strike - 5}～${pin1.strike} 被帶量灌破，造市商負 Gamma 追空會觸發加速下殺，中途在 ${midSupportRow.strike}（留倉 ${midSupportRow.poi.toLocaleString()}P）有短線小反彈；而 ${maxPutOiRow.strike} 是昨日留倉全場最大 Put OI 大本營（${maxPutOiRow.poi.toLocaleString()} 口 Put），殺到 ${maxPutOiRow.strike} 空頭全面平倉會觸發大級別反彈！`
+    }
+  ];
+
+  const container = document.getElementById('quick-cards-container');
+  if (container) {
+    container.innerHTML = cards.map(c => `
+      <div class="quick-card">
+        <div class="quick-card-top">
+          <span class="quick-badge ${c.badgeClass}">${c.badgeText}</span>
+        </div>
+        <div class="quick-strike">${c.strikeHtml}</div>
+        <div class="quick-action" style="color:${c.actionColor};">${c.actionText}</div>
+        <div class="quick-why">${c.whyText}</div>
+      </div>
+    `).join('');
+  }
 }
 
 function renderDashboard() {
@@ -1292,12 +1532,13 @@ function renderDashboard() {
     ? `現價高於 Flip (+${(currentSpot - flipStrike).toFixed(1)}點) · 正 Gamma 穩定減速區`
     : `現價低於 Flip (-${(flipStrike - currentSpot).toFixed(1)}點) · 負 Gamma 震盪加速口袋`;
 
+  const fmtIV = (v) => (v > 1.5 ? v : v * 100).toFixed(2);
   document.getElementById('lvl-call-tag').textContent = isDealerLong
     ? '🟢 CALL WALL (造市商真買方鐵板)'
     : '🔥 CALL WALL (買盤搶購·軋空警戒)';
   setCardLevel('lvl-call', 'lvl-call-es', callWall.strike);
   document.getElementById('lvl-call-desc').textContent =
-    `淨 vGEX +$${(callWall.vol_vgex/1000).toFixed(2)}B (${callWall.cvol.toLocaleString()}口 Call) · IV ${(callWall.iv*100).toFixed(2)}%`;
+    `淨 vGEX +$${(callWall.vol_vgex/1000).toFixed(2)}B (${callWall.cvol.toLocaleString()}口 Call) · IV ${fmtIV(callWall.iv)}%`;
 
   setCardLevel('lvl-put', 'lvl-put-es', putTrigger.strike);
   document.getElementById('lvl-put-desc').textContent =
@@ -1323,18 +1564,19 @@ function renderDashboard() {
 
   renderChart1();
   renderChart2();
+  renderQuickGuide();
   renderLadder();
 
   const atmRow = SNAPSHOT.key_levels.atm_row;
   const minIVRow = SNAPSHOT.key_levels.min_iv_row;
 
   let ivHtml = `<ul>`;
-  ivHtml += `<li><strong>現價價平 (${atmRow.strike}) IV 為 <span class="highlight-cyan">${(atmRow.iv*100).toFixed(2)}%</span>，全表最低 IV 落在 <span class="highlight-cyan">${minIVRow.strike} (${(minIVRow.iv*100).toFixed(2)}%)</span></strong>。</li>`;
+  ivHtml += `<li><strong>現價價平 (${atmRow.strike}) IV 為 <span class="highlight-cyan">${fmtIV(atmRow.iv)}%</span>，全表最低 IV 落在 <span class="highlight-cyan">${minIVRow.strike} (${fmtIV(minIVRow.iv)}%)</span></strong>。</li>`;
   if (isDealerLong) {
-    ivHtml += `<li><span class="highlight-green">✅ 確認上方 Call Wall (${callWall.strike} / ES ${(callWall.strike+basis).toFixed(0)}) 為「造市商真買方（Long Gamma）」</span>：該履約價累積高達 <strong>${callWall.cvol.toLocaleString()} 口 Call</strong>，但 IV 被壓低至 <strong>${(callWall.iv*100).toFixed(2)}%</strong>（低於價平之 ${(atmRow.iv*100).toFixed(2)}%），證明市場大戶是在「主動倒貨賣出 Call（Overwriting）」給造市商。</li>`;
+    ivHtml += `<li><span class="highlight-green">✅ 確認上方 Call Wall (${callWall.strike} / ES ${(callWall.strike+basis).toFixed(0)}) 為「造市商真買方（Long Gamma）」</span>：該履約價累積高達 <strong>${callWall.cvol.toLocaleString()} 口 Call</strong>，但 IV 被壓低至 <strong>${fmtIV(callWall.iv)}%</strong>（低於價平之 ${fmtIV(atmRow.iv)}%），證明市場大戶是在「主動倒貨賣出 Call（Overwriting）」給造市商。</li>`;
     ivHtml += `<li><strong>實戰意義</strong>：當 SPX 靠近 <span class="highlight-green">${callWall.strike - 5} ～ ${callWall.strike + 5}</span>（ES <span class="highlight-gold">${(callWall.strike - 5 + basis).toFixed(0)} ～ ${(callWall.strike + 5 + basis).toFixed(0)}</span>）時，造市商會機械式拋售 ES 期貨對沖，屬於<strong>高勝率真鐵板阻力，無軋空風險</strong>。</li>`;
   } else {
-    ivHtml += `<li><span class="highlight-red">🚨 警告！上方最大量 Call (${callWall.strike} / ES ${(callWall.strike+basis).toFixed(0)}) 出現「買方搶購特徵（Short Gamma 軋空風險）」</span>：該處成交 <strong>${callWall.cvol.toLocaleString()} 口 Call</strong>，且 IV 高達 <strong>${(callWall.iv*100).toFixed(2)}%</strong>，顯示主動買盤湧入，造市商被迫當賣方！一旦突破將引發追買助漲，切勿逆勢摸頂！</li>`;
+    ivHtml += `<li><span class="highlight-red">🚨 警告！上方最大量 Call (${callWall.strike} / ES ${(callWall.strike+basis).toFixed(0)}) 出現「買方搶購特徵（Short Gamma 軋空風險）」</span>：該處成交 <strong>${callWall.cvol.toLocaleString()} 口 Call</strong>，且 IV 高達 <strong>${fmtIV(callWall.iv)}%</strong>，顯示主動買盤湧入，造市商被迫當賣方！一旦突破將引發追買助漲，切勿逆勢摸頂！</li>`;
   }
   ivHtml += `</ul>`;
   document.getElementById('dynamic-iv-content').innerHTML = ivHtml;
