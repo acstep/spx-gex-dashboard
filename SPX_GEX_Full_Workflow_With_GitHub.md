@@ -227,17 +227,13 @@ $$\Delta\text{IV}_K = \text{IV}_{K, t} - \text{IV}_{K, t-1}$$
 2. **檢查當日流水號 (`SEQ`) 與前筆對帳**：
    - 讀取 `data/manifest.json`（或查詢 GitHub API `contents/data/YYYY-MM-DD`），找出當日已有幾筆快照，將新快照編號設為 `SEQ = N + 1`（格式化為 3 位數，如 `001`、`002`、`003`）。
    - 若當日已有前一筆快照 `SEQ - 1`，自動讀取前一筆 `_calc.json`，計算每個履約價的 `dcvol` ($\Delta\text{CallVol}$)、`dpvol` ($\Delta\text{PutVol}$)、`dnet_vol` 與 `div` ($\Delta\text{IV}$)，**並對帳上一筆 `SEQ - 1` 的 `劇本 A` 預測是否與真實走勢相符（若不符則強制觸發「鐵律七：連錯即斬」並記錄至錯題本）**。
-3. **執行跨日全樣本量化回歸與盤態鎖定 (`run_gex_regression_audit.py`)**：
-   - 執行 `python3 /home/user/run_gex_regression_audit.py`，檢視全歷史樣本之回歸係數 (`Below20_vGEX`, `Inc_vGEX`) 與最新一筆快照之 **「強制盤態鎖定 (Mandatory Regime Lock)」**，確保撰寫之 `劇本 A` 方向 100% 符合定量回歸結果，嚴禁主觀亂說！
-   - **嚴格執行【鐵律八：全場最低 IV 碗底 (`Min IV Bowl`) 與 `Call Wall` 階梯移動定律】**：當 `Spot > Gamma Flip` 且 `Loc15_vGEX > 0` 時，即使腳下 `Below20_vGEX < 0`（實為多頭保護墊），指數必順正 Gamma 階梯衝向上方最低 IV 碗底（嚴禁誤判為盤態 3）；當 `Spot < Gamma Flip` 且最低 IV 碗底隨時間階梯下移（如 `7740 ➔ 7735 ➔ 7730 ➔ 7720 ➔ 7715`），代表機構賣 Call 鐵蓋正往下壓，嚴禁逆勢抄底看 V 轉！
-   - **嚴格執行【鐵律九：高正 Gamma 雙向飽和均值回歸 (`R4`) 與早盤 Call Skew 搶籌預警（`2026-10-20` 實盤驗證）】**：
-     1. **高正 Gamma 雙向飽和均值回歸 (`R4_POS_GAMMA_MEAN_REVERT`)**：當全場 `Tot_vGEX > +$100B`、`Above20_vGEX > 0`，且滿足 `Spot >= King_Pin + 4.0` 或 **`Below20_vGEX > +$50B`（大漲後腳下 20 點正 Gamma 高度飽和）** 時，歷史 8 日 41 次推進中出現 5 次 **100.0% 下一筆橫盤或壓回下檔磁王**（平均 `-7.78 點`）！尤其當單筆 `Inc_vGEX` 較前筆驟降 >80% 且腳下 `Below20_dNet < -10,000`（機構買 Put 鎖利）時，必須強制鎖定為 `🧲 盤態 4 (BEAR_OR_PIN)` 高檔均值回歸回踩下檔磁王，嚴禁再機械式追高！
-     2. **早盤淺碟負 Gamma 之右翼 Call Skew 搶籌預警**：當早盤 `Tot_Pin < $80B`、`|Tot_vGEX| < $10B` 且指數小跌，若右翼價外 Call IV (`dIV`) 漲幅達左翼 Put IV 漲幅的 2~4 倍並伴隨數萬口價外 Call 淨買盤，代表機構正趁回檔大買價外 Call，一旦站回 `Gamma Flip` 立即啟動 Vanna 軋空劇本！
-   - **嚴格執行【鐵律十：早盤高開腳下懸空回踩 (`10A`) ＋ 淺碟急殺脫離磁王超跌反抽 (`10B`) ＋ 縮波增量翻正突破分水嶺 (`10C`) 定律（`2026-10-21` 實盤驗證）】**：
-     1. **(10A) 早盤淺碟高開、腳下負 Gamma 懸空回踩**：當早盤 `Tot_Pin < $80B`、`Tot_vGEX < +$10B`，若現價高開於 `#1 磁王 (KP)` 上方達 `+5.0 點` 以上 (`Spot >= KP + 5.0`)，且腳下 20 點為負 Gamma 懸空區 (`Below20_vGEX < 0` 且 `Below20_dNet < 0`)，強制鎖定為 `🟠 盤態 3 (BEAR)`，嚴禁盲目追高！
-     2. **(10B) 淺層負 Gamma (`Tot_vGEX > -$40B`) 急殺乖離磁王 (`KP - Spot >= 10 點`) 之超跌反抽**：當 `Below20_vGEX < 0` 且 `Above20_vGEX < 0`，若 `Tot_vGEX > -$40B`（尚未進入 `-$65B+` 深水瀑布）且上方 `#1 磁王` 高於現價達 `10 點` 以上 (`KP - Spot >= 10.0`)，強制鎖定為 `🟢 盤態 5 (BULL)` 超跌反抽磁王，嚴禁在急跌最低點追空！
-     3. **(10C) 分水嶺下沿「增量翻正 + 頭頂買 Call > 1.8倍腳下買 Put + 劇烈縮波 (`avg_dIV <= -1.0%`)」之黃金交叉突破**：當靜態 `Spot < Flip` 且 `Below20_dNet < -3,000` 時，若同時滿足 `Inc_vGEX > 0`、`NTM25_dNet > +8,000`、`Above20_dNet > 1.8 × |Below20_dNet|` 且 `avg_dIV <= -1.0%`（或 `Tot_vGEX > +$25B`），強制覆寫 `🟠 盤態 3` 並升格為 `🟢 盤態 5 (BULL)` 突破軋空主劇本！
-   - **嚴禁事後美化對帳戰績**：若盤中曾因人為干預改口看錯（如 `10/19 #001`）或主劇本 A 失誤（如 `10/21 #001~#003`），後續對帳表必須誠實記為 `❌ 失誤`，不得以次劇本 B/C 命中或事後修正後的模型結果掩蓋實盤主劇本 A 失誤。
+3. **嚴禁使用 Python `if-else` 腳本死鎖盤態！改由「AI 模型結合期權數據 ＋ 當日即時新聞 ＋ 當前總經環境」全盤綜合分析**：
+   - 🚫 **最高核心原則（使用者明確指示）**：**交易沒有固定死規則，寫 `if-else` 程式腳本不可能正確預測市場！Python 僅作為「純計算機與繪圖工具」（計算 `vGEX`、`Pin`、`ΔVol`、`ΔIV` 並生成雙圖表），絕對禁止用 Python 腳本的硬性 `if-else` 分類去決定劇本方向！**
+   - 🧠 **AI 大模型三維度全盤綜合研判流程**：
+     1. **【維度一：期權鏈微觀數據與盤中序列演變 (`#001 ➔ #N`)】**：將算出的逐檔 `vGEX`、`Total Pin`、`ΔCall / ΔPut`、`ΔIV` 微笑曲線變化、上下方籌碼分佈直接輸入 AI 模型，由模型觀察主力資金的真實意圖（是買 Call 追價、賣 Put 收租、還是恐慌買 Put 避險）。
+     2. **【維度二：即時搜尋當日財經新聞與當前市場環境 (`web_search`)】**：每次分析時，主動檢索當日美股盤中即時新聞、總經經濟數據發布（如 CPI、非農、PMI、初領失業金）、美債殖利率（10Y Yield）、VIX 走勢、權值股（七巨頭）財報/消息、聯準會動向與地緣政治事件，掌握當下市場情緒與漲跌背後的真實催化劑。
+     3. **【維度三：數據 × 新聞 × 當前環境之深度融合推演】**：將「期權鏈籌碼結構」、「當日新聞與宏觀環境」與過往實盤經驗一併送入 AI 模型進行靈活、有邏輯的綜合研判（例如：區分「總經利空引發的真崩盤」vs.「無實質利空下的早盤洗盤與縮波 V 轉」），給出最貼合當下真實市況的 `⚠️ 當下需要注意什麼` 與 `📈 接下來劇本推演（劇本 A / B / C）`。
+   - **誠實對帳原則**：每次新快照仍須誠實核對上一筆預測與實際走勢，不找藉口、不事後美化。
 4. **寫入歸檔檔案（嚴禁覆蓋歷史檔案）**：
    - 產生 `data/YYYY-MM-DD/YYYYMMDD_SEQ_spotXXXX.XX_raw.csv`
    - 產生 `data/YYYY-MM-DD/YYYYMMDD_SEQ_spotXXXX.XX_calc.json`
@@ -254,4 +250,4 @@ $$\Delta\text{IV}_K = \text{IV}_{K, t} - \text{IV}_{K, t-1}$$
 
 當你開啟一個全新的 AI 對話視窗時，只需把這份檔案與 `SPX_GEX_Prediction_Error_Log_and_Correction_Ledger.md` 丟給 AI，並說：
 
-> **「請讀取這份 `SPX_GEX_Full_Workflow_With_GitHub.md` 與《歷史預測錯題本》作為你的系統規範。接下來我每次貼上或上傳 IBKR 的 SPX/ES 選擇權鏈數據，請自動幫我：1. 先跑 `run_gex_regression_audit.py` 對帳上一筆預測並鎖定當下定量盤態（嚴格遵守七大鐵律與五不亂說戒律，絕不逆勢硬拗 V 轉）；2. 完成三層 GEX + IV 驗真分析與實戰劇本；3. 將 raw.csv 與 calc.json 按流水號歸檔至 `acstep/spx-gex-dashboard` 的 `/data/YYYY-MM-DD/` 目錄；4. 更新 `index.html` 只顯示最新一期雙圖表儀表板並推送到 GitHub Pages。」**
+> **「請讀取這份 `SPX_GEX_Full_Workflow_With_GitHub.md` 與《歷史預測錯題本》作為你的系統規範。接下來我每次貼上或上傳 IBKR 的 SPX/ES 選擇權鏈數據，請自動幫我：1. Python 只用來精確計算三層 GEX / ΔVolume / ΔIV 數值與畫圖，絕對不要用死板的 Python `if-else` 腳本去預測盤勢；2. 主動搜尋當日美股即時新聞、總經數據、美債殖利率與市場環境 (`web_search`)，將『期權鏈籌碼數據 ＋ 盤中序列變化 ＋ 當日新聞與當前環境』全部送進 AI 模型進行深度綜合研判，推演出最貼合真實市況的劇本 A/B/C；3. 將 raw.csv 與 calc.json 按流水號歸檔至 `acstep/spx-gex-dashboard` 的 `/data/YYYY-MM-DD/` 目錄；4. 更新 `index.html` 只顯示最新一期雙圖表儀表板並推送到 GitHub Pages。」**
