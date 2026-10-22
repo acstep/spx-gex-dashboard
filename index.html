@@ -1428,32 +1428,65 @@ function renderQuickGuide() {
   const tldrEl = document.getElementById('quick-tldr-content');
   // If AI model provided custom tailored quick_guide for this snapshot, render it with dynamic ES basis support!
   if (SNAPSHOT.quick_guide && SNAPSHOT.quick_guide.cards && SNAPSHOT.quick_guide.cards.length) {
-    const qg = SNAPSHOT.quick_guide;
-    const replaceStrikes = (str) => {
-      if (!str) return '';
-      return str.replace(/\[\[(\d{4}(?:\.\d+)?)\]\]/g, (_, sVal) => fmtInline(parseFloat(sVal)));
-    };
-    if (tldrEl && qg.tldr_html) {
-      tldrEl.innerHTML = replaceStrikes(qg.tldr_html);
-    }
-    const container = document.getElementById('quick-cards-container');
-    if (container) {
-      container.innerHTML = qg.cards.map(c => {
-        const primaryHtml = fmtDual(c.strike);
-        const subHtml = c.strike_sub ? ` <span style="font-size:13px; color:var(--text-muted);">${replaceStrikes(c.strike_sub)}</span>` : '';
-        return `
-          <div class="quick-card">
-            <div class="quick-card-top">
-              <span class="quick-badge ${c.badgeClass}">${c.badgeText}</span>
+    try {
+      const qg = SNAPSHOT.quick_guide;
+      const replaceStrikes = (str) => {
+        if (str === undefined || str === null) return '';
+        return String(str).replace(/\[\[(\d{4}(?:\.\d+)?)\]\]/g, (_, sVal) => fmtInline(parseFloat(sVal)));
+      };
+      const formatCardStrike = (s) => {
+        if (typeof s === 'number' && !Number.isNaN(s)) return fmtDual(s);
+        const sStr = String(s || '');
+        const numMatch = sStr.match(/^\d{4}(?:\.\d+)?$/);
+        if (numMatch) return fmtDual(parseFloat(sStr));
+        // If string contains [[strike]] ranges like "[[7695]] ～ [[7700]]", format nicely with ES badge
+        const nums = [...sStr.matchAll(/\[\[(\d{4}(?:\.\d+)?)\]\]/g)].map(m => parseFloat(m[1]));
+        const cleanMain = sStr.replace(/\[\[(\d{4}(?:\.\d+)?)\]\]/g, (_, v) => {
+          const n = parseFloat(v);
+          const esV = n + basis;
+          const esS = Number.isInteger(esV) ? String(esV) : esV.toFixed(1);
+          return showES ? `ES ${esS}` : `${n}`;
+        });
+        if (nums.length >= 2) {
+          const es0 = nums[0] + basis, es1 = nums[nums.length - 1] + basis;
+          const esRange = `${Number.isInteger(es0) ? es0 : es0.toFixed(0)}～${Number.isInteger(es1) ? es1 : es1.toFixed(0)}`;
+          const spxRange = `${nums[0]}～${nums[nums.length - 1]}`;
+          if (showES) {
+            return `<span>${cleanMain}</span> <span style="font-size:12px; color:var(--text-muted); font-weight:600;">(SPX ${spxRange})</span>`;
+          }
+          return `<span>${cleanMain}</span> <span style="font-size:12px; color:var(--pin-gold); background:var(--pin-gold-bg); padding:1px 6px; border-radius:4px; font-weight:700;">ES ${esRange}</span>`;
+        } else if (nums.length === 1) {
+          return fmtDual(nums[0]);
+        }
+        return replaceStrikes(sStr);
+      };
+      if (tldrEl && qg.tldr_html) {
+        tldrEl.innerHTML = replaceStrikes(qg.tldr_html);
+      }
+      const container = document.getElementById('quick-cards-container');
+      if (container) {
+        container.innerHTML = qg.cards.map(c => {
+          const primaryHtml = formatCardStrike(c.strike);
+          const subHtml = c.strike_sub ? ` <span style="font-size:13px; color:var(--text-muted);">${replaceStrikes(c.strike_sub)}</span>` : '';
+          const bText = c.badgeText || c.badge || '';
+          const bClass = c.badgeClass || '';
+          const bStyle = (c.badgeBg || c.badgeColor) ? `style="background:${c.badgeBg || 'var(--pin-gold-bg)'}; color:${c.badgeColor || 'var(--pin-gold)'};"` : '';
+          return `
+            <div class="quick-card">
+              <div class="quick-card-top">
+                <span class="quick-badge ${bClass}" ${bStyle}>${bText}</span>
+              </div>
+              <div class="quick-strike">${primaryHtml}${subHtml}</div>
+              <div class="quick-action" style="color:${c.actionColor};">${replaceStrikes(c.actionText)}</div>
+              <div class="quick-why">${replaceStrikes(c.whyText)}</div>
             </div>
-            <div class="quick-strike">${primaryHtml}${subHtml}</div>
-            <div class="quick-action" style="color:${c.actionColor};">${replaceStrikes(c.actionText)}</div>
-            <div class="quick-why">${replaceStrikes(c.whyText)}</div>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
+      }
+      return;
+    } catch (err) {
+      console.error('Custom quick_guide render error:', err);
     }
-    return;
   }
 
   if (tldrEl) {
@@ -1594,7 +1627,7 @@ function renderDashboard() {
 
   renderChart1();
   renderChart2();
-  renderQuickGuide();
+  try { renderQuickGuide(); } catch (e) { console.error('renderQuickGuide error:', e); }
   renderLadder();
 
   const atmRow = SNAPSHOT.key_levels.atm_row;
