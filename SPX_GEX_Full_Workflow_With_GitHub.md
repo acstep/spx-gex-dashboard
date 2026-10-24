@@ -244,6 +244,28 @@ $$\Delta\text{IV}_K = \text{IV}_{K, t} - \text{IV}_{K, t-1}$$
    - 使用環境變數 `$GITHUB_TOKEN` 透過 Git Trees API 將當筆 `_raw.csv`、`_calc.json`、`data/manifest.json`、`latest.json` 與 `index.html` 打包為**單一原子 Commit** 推送至 `acstep/spx-gex-dashboard`，避免連續多次 `PUT /contents/` 觸發 GitHub Pages 重複取消構建。
    - ⚠️ **嚴格安全守則**：任何提交至 GitHub 的程式碼、Markdown 或 JSON 檔案中，**絕對不可包含任何真實 Personal Access Token 或私密金鑰字串**！
 
+7. **🚨 回覆使用者時，必須同時附上可點擊的 GitHub / Pages 連結（`2026-10-24` 使用者明確要求，最高優先級）**：
+   使用者原話：「**每次我給你DATA 分析完直之後再這邊要一起給我GITHUB網址 讓我可以直接連過去看**」
+   → **分析文字寫完後，最後一定要放上「📎 本次更新連結」區塊**，而且連結必須是**當筆的真實路徑**（含日期與檔名），不可只給首頁，也不可放佔位符。
+
+   固定格式（每次複製後把 `YYYY-MM-DD`、`YYYYMMDD_SEQ_spotXXXX.XX` 換成本次實際值）：
+
+   ```markdown
+   📎 本次更新連結
+   - 🖥️ **儀表板（直接看）**：https://acstep.github.io/spx-gex-dashboard/
+   - 📂 今日資料夾（全部快照）：https://github.com/acstep/spx-gex-dashboard/tree/main/data/YYYY-MM-DD
+   - 📄 本筆原始 CSV：https://github.com/acstep/spx-gex-dashboard/blob/main/data/YYYY-MM-DD/YYYYMMDD_SEQ_spotXXXX.XX_raw.csv
+   - 📊 本筆計算 JSON：https://github.com/acstep/spx-gex-dashboard/blob/main/data/YYYY-MM-DD/YYYYMMDD_SEQ_spotXXXX.XX_calc.json
+   - 🗂️ 累積索引 manifest：https://github.com/acstep/spx-gex-dashboard/blob/main/data/manifest.json
+   - 🏠 專案首頁：https://github.com/acstep/spx-gex-dashboard
+   ```
+
+   ⚠️ 若本次同時產出專題報告（如 EOD 對帳）、錯題本或新的 MD 文件，**也要一併附上該檔案的 URL**：
+   - 報告頁：`https://acstep.github.io/spx-gex-dashboard/reports/<檔名>.html`
+   - 文件：`https://github.com/acstep/spx-gex-dashboard/blob/main/<檔名>.md`
+
+   ⚠️ **推送完成後必須先自行驗證連結可用（HTTP 200），再貼給使用者**；GitHub Pages 有 20~60 秒 CDN 延遲，若剛推完還沒生效，要在回覆中註明「Pages 約 1 分鐘後生效，repo 連結立即可看」。
+
 ---
 
 ## 六、 在新對話視窗一鍵啟動之話術（Copy-Paste 啟動指令）
