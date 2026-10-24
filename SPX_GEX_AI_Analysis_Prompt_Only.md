@@ -167,3 +167,18 @@
    - `2026-10-23 #007`（`Spot 7630.07`，`Flip 7645`，`Below20_vGEX -$126.11B`）AI 給出「`40% + 35% = 75%` 非空方」，實際收盤 `7,623.68`（低於預測釘盤中心 `13.82 點`）。
    - 使用者於對帳後明確表示：**仍維持純 AI 綜合判斷，不回到程式規則**；並選擇**不新增報告區塊**。
    - 因此上述紀律以「內部推理約束」形式存在，而非新增的輸出區塊。
+
+5. **【回覆必附 GitHub / Pages 連結（`2026-10-24` 使用者明確要求）】**
+   - 使用者原話：「**每次我給你DATA 分析完直之後再這邊要一起給我GITHUB網址 讓我可以直接連過去看**」。
+   - 因此：**任何一次數據分析回覆的最後，都必須附上「📎 本次更新連結」區塊**，且連結要是當筆真實路徑（含日期與檔名），不可只給首頁、不可用佔位符。
+   - 固定格式：
+     ```markdown
+     📎 本次更新連結
+     - 🖥️ 儀表板（直接看）：https://acstep.github.io/spx-gex-dashboard/
+     - 📂 今日資料夾：https://github.com/acstep/spx-gex-dashboard/tree/main/data/YYYY-MM-DD
+     - 📄 本筆原始 CSV：https://github.com/acstep/spx-gex-dashboard/blob/main/data/YYYY-MM-DD/YYYYMMDD_SEQ_spotXXXX.XX_raw.csv
+     - 📊 本筆計算 JSON：https://github.com/acstep/spx-gex-dashboard/blob/main/data/YYYY-MM-DD/YYYYMMDD_SEQ_spotXXXX.XX_calc.json
+     - 🗂️ 累積索引：https://github.com/acstep/spx-gex-dashboard/blob/main/data/manifest.json
+     ```
+   - 若本次另有專題報告／錯題本／新文件，**一併附上該檔案 URL**。
+   - 推送後**必須先驗證 HTTP 200** 再貼給使用者；Pages 有 20~60 秒延遲需在回覆中註明。
