@@ -580,7 +580,7 @@
         <div class="label">最新快照 (Snapshot)</div>
         <div class="val" id="disp-date">--</div>
       </div>
-      <div class="metric-pill">
+      <div class="metric-pill" id="pill-spot">
         <div class="label">SPX 現價 (Spot)</div>
         <div class="val" id="disp-spot">--</div>
       </div>
@@ -590,8 +590,8 @@
           +<input type="number" step="0.25" id="es-basis" class="basis-input" value="11.00" oninput="onBasisChange()">
         </div>
       </div>
-      <div class="metric-pill">
-        <div class="label">對應 ES 期貨價</div>
+      <div class="metric-pill" id="pill-es" style="display:none;">
+        <div class="label">ES 期貨價 (Futures)</div>
         <div class="val" id="disp-es" style="color: var(--pin-gold);">--</div>
       </div>
       <button class="es-mode-btn" id="es-mode-btn-top" onclick="toggleESMode()">
@@ -745,7 +745,7 @@
         </div>
       </div>
       <div style="display:grid; grid-template-columns:115px 1fr 85px 68px; gap:8px; padding:0 6px 6px; font-size:11px; color:var(--text-muted); border-bottom:1px solid var(--border); margin-bottom:6px;">
-        <div id="col-strike-title">SPX (ES 點位)</div>
+        <div id="col-strike-title">SPX 履約價</div>
         <div style="text-align:center;">負 Gamma (橘) ◄─── 0 ───► 正 Gamma (藍)</div>
         <div style="text-align:right;" id="col-metric-title">vGEX ($B)</div>
         <div style="text-align:right;">IV (%)</div>
@@ -786,8 +786,8 @@
       <div class="diag-card" style="border-color: #9333ea;">
         <h3>🧲 右上角第 ② 張圖「上藍 Call、下橘 Put」怎麼看磁吸強度？</h3>
         <ul>
-          <li><strong>一眼抓出「雙邊重兵對鎖」的超大磁鐵</strong>：看上方右邊第 ② 張圖（Call vs. Put），當某個履約價<strong>同時出現「向上超長藍柱」與「向下超長橘柱」</strong>（例如 <code>7650</code> 向上藍柱 +$66.3B、向下橘柱 -$64.3B，紫色總磁吸曲線衝上最高峰 $132.7B），代表多空主力在該點位大量對鎖！</li>
-          <li><strong>為什麼左邊第 ① 張圖看不出來？</strong> 因為第 ① 張圖把藍柱減橘柱（+66.3B - 64.3B = +2.0B），相減後在 7650 只剩下一根不起眼的小短柱。所以<strong>左圖用來找「單邊牆（Call/Put Wall）」，右圖用來找「雙邊對鎖的最大磁鐵（King Pin）」</strong>！</li>
+          <li><strong>一眼抓出「雙邊重兵對鎖」的超大磁鐵</strong>：看上方右邊第 ② 張圖（Call vs. Put），當某個履約價<strong>同時出現「向上超長藍柱」與「向下超長橘柱」</strong>（例如 <code id="guide-ex-strike">7650</code> 向上藍柱 +$66.3B、向下橘柱 -$64.3B，紫色總磁吸曲線衝上最高峰 $132.7B），代表多空主力在該點位大量對鎖！</li>
+          <li><strong>為什麼左邊第 ① 張圖看不出來？</strong> 因為第 ① 張圖把藍柱減橘柱（+66.3B - 64.3B = +2.0B），相減後在 <code id="guide-ex-strike2">7650</code> 只剩下一根不起眼的小短柱。所以<strong>左圖用來找「單邊牆（Call/Put Wall）」，右圖用來找「雙邊對鎖的最大磁鐵（King Pin）」</strong>！</li>
         </ul>
       </div>
 
@@ -941,15 +941,15 @@ function syncESButtons() {
   if (showES) {
     btnTop.classList.add('active');
     btnChart.classList.add('active');
-    btnTop.innerHTML = `🎯 目前顯示：ES 期貨點位 (Basis ${bStr}) ｜ 點擊切回 SPX`;
-    btnChart.innerHTML = `🎯 目前顯示：ES 期貨點位 (Basis ${bStr}) ｜ 點擊切回 SPX`;
-    if (colTitle) colTitle.innerHTML = `<strong style="color:var(--pin-gold);">🎯 ES 點位</strong> (SPX)`;
+    btnTop.innerHTML = `🎯 目前全部顯示：<b>ES 期貨點位</b> (SPX${bStr}) ｜ 點此切回 SPX`;
+    btnChart.innerHTML = `🎯 目前全部顯示：<b>ES 期貨點位</b> (SPX${bStr}) ｜ 點此切回 SPX`;
+    if (colTitle) colTitle.innerHTML = `<strong style="color:var(--pin-gold);">🎯 ES 期貨點位</strong>`;
   } else {
     btnTop.classList.remove('active');
     btnChart.classList.remove('active');
-    btnTop.innerHTML = `🎯 點擊切換：全圖表改以 ES 期貨點位 (SPX${bStr}) 顯示`;
-    btnChart.innerHTML = `🎯 點擊切換：圖表改以 ES 期貨點位 (SPX${bStr}) 顯示`;
-    if (colTitle) colTitle.textContent = `SPX (ES 點位)`;
+    btnTop.innerHTML = `📊 目前全部顯示：<b>SPX 現貨點位</b> ｜ 點此切換成 ES`;
+    btnChart.innerHTML = `📊 目前全部顯示：<b>SPX 現貨點位</b> ｜ 點此切換成 ES`;
+    if (colTitle) colTitle.innerHTML = `<strong>SPX 履約價</strong>`;
   }
   updateChartTitles();
 }
@@ -1248,7 +1248,7 @@ function renderChart2() {
     out += `<rect x="${cx - stepX/2}" y="${padT}" width="${stepX}" height="${plotH}" fill="transparent" style="cursor:crosshair;" onmousemove="showTooltip(event, ${i}, 'c2')" onmouseleave="hideTooltip('c2')" />`;
   });
 
-  const axisTitle = showES ? `🎯 ES Futures Price Level (SPX + Basis ${getBasis()>=0?'+':''}${getBasis()})` : `SPX Strike Price`;
+  const axisTitle = showES ? `🎯 ES 期貨點位` : `SPX 履約價`;
   out += `<text x="${padL + plotW/2}" y="${H - 4}" text-anchor="middle" fill="${xLabelColor}" font-size="12" font-weight="700">${axisTitle}</text>`;
   svg.innerHTML = out;
 }
@@ -1263,8 +1263,8 @@ function showTooltip(evt, idx, which) {
   const rect = wrapper.getBoundingClientRect();
 
   const headerLine = showES
-    ? `<span style="color:#fbbf24;">🎯 ES 點位 ${(d.strike + basis).toFixed(1)}</span> <span style="font-size:11px; color:#94a3b8;">(SPX ${d.strike})</span>`
-    : `SPX Strike ${d.strike} ｜ <span style="color:#fbbf24;">ES ${(d.strike + basis).toFixed(1)}</span>`;
+    ? `<span style="color:#fbbf24;">🎯 ES 點位 ${(d.strike + basis).toFixed(1)}</span>`
+    : `SPX Strike ${d.strike}`;
 
   tooltip.style.display = 'block';
   tooltip.innerHTML = `
@@ -1347,14 +1347,14 @@ function renderLadder() {
       : `${fmtIV(d.iv)}%`;
 
     const strikeCellHtml = showES
-      ? `<span style="color:var(--pin-gold); font-weight:800;">${fmtLvl(d.strike)}${isSpotNearest ? '🎯' : ''}</span><span class="es-val" style="color:var(--text-muted);">(${d.strike})</span>`
-      : `<span>${d.strike}${isSpotNearest ? '🎯' : ''}</span><span class="es-val">(${fmtLvl(d.strike + basis - (showES?basis:0))})</span>`;
+      ? `<span style="color:var(--pin-gold); font-weight:800;">${fmtLvl(d.strike)}${isSpotNearest ? '🎯' : ''}</span>`
+      : `<span>${d.strike}${isSpotNearest ? '🎯' : ''}</span>`;
 
     row.innerHTML = `
       <div class="strike-label">
         ${showES
-          ? `<span style="color:var(--pin-gold); font-weight:800;">${fmtLvl(d.strike)}${isSpotNearest ? '🎯' : ''}</span><span class="es-val" style="color:var(--text-muted);">(${d.strike})</span>`
-          : `<span>${d.strike}${isSpotNearest ? '🎯' : ''}</span><span class="es-val">(${(d.strike + basis).toFixed(0)})</span>`
+          ? `<span style="color:var(--pin-gold); font-weight:800;">${fmtLvl(d.strike)}${isSpotNearest ? '🎯' : ''}</span>`
+          : `<span>${d.strike}${isSpotNearest ? '🎯' : ''}</span>`
         }
       </div>
       <div class="bar-track">${barHtml}</div>
@@ -1381,15 +1381,12 @@ function renderQuickGuide() {
   const fmtDual = (spx) => {
     const esVal = spx + basis;
     const esStr = Number.isInteger(esVal) ? String(esVal) : esVal.toFixed(1);
-    if (showES) {
-      return `<span>ES ${esStr}</span> <span style="font-size:12px; color:var(--text-muted); font-weight:600;">(SPX ${spx})</span>`;
-    }
-    return `<span>${spx}</span> <span style="font-size:12px; color:var(--pin-gold); background:var(--pin-gold-bg); padding:1px 6px; border-radius:4px; font-weight:700;">ES ${esStr}</span>`;
+    return showES ? `<span style="color:var(--pin-gold); font-weight:800;">${esStr}</span>` : String(spx);
   };
   const fmtInline = (spx) => {
     const esVal = spx + basis;
     const esStr = Number.isInteger(esVal) ? String(esVal) : esVal.toFixed(0);
-    return showES ? `ES ${esStr} (SPX ${spx})` : `${spx} (ES ${esStr})`;
+    return showES ? `ES ${esStr}` : `${spx}`;
   };
 
   // Find key OI and Volume strikes from rows
@@ -1430,9 +1427,24 @@ function renderQuickGuide() {
   if (SNAPSHOT.quick_guide && SNAPSHOT.quick_guide.cards && SNAPSHOT.quick_guide.cards.length) {
     try {
       const qg = SNAPSHOT.quick_guide;
+      const autoES = (str) => str.replace(/\b(7,?\d{3}(?:\.\d+)?)\b/g, (m, numStr) => {
+        const val = parseFloat(numStr.replace(/,/g, ''));
+        if (val < 7000 || val > 9000) return m;
+        const esVal = val + basis;
+        return Number.isInteger(esVal) ? String(esVal) : esVal.toFixed(numStr.includes('.') ? 2 : 1);
+      });
       const replaceStrikes = (str) => {
         if (str === undefined || str === null) return '';
-        return String(str).replace(/\[\[(\d{4}(?:\.\d+)?)\]\]/g, (_, sVal) => fmtInline(parseFloat(sVal)));
+        const raw = String(str);
+        if (!showES) {
+          return raw.replace(/\[\[(\d{4}(?:\.\d+)?)\]\]/g, (_, sVal) => fmtInline(parseFloat(sVal)));
+        }
+        const parts = raw.split(/(\[\[\d{4}(?:\.\d+)?\]\])/);
+        return parts.map(pp => {
+          const mt = pp.match(/^\[\[(\d{4}(?:\.\d+)?)\]\]$/);
+          if (mt) return fmtInline(parseFloat(mt[1]));
+          return autoES(pp);
+        }).join('');
       };
       const formatCardStrike = (s) => {
         if (typeof s === 'number' && !Number.isNaN(s)) return fmtDual(s);
@@ -1445,16 +1457,10 @@ function renderQuickGuide() {
           const n = parseFloat(v);
           const esV = n + basis;
           const esS = Number.isInteger(esV) ? String(esV) : esV.toFixed(1);
-          return showES ? `ES ${esS}` : `${n}`;
+          return showES ? esS : `${n}`;
         });
         if (nums.length >= 2) {
-          const es0 = nums[0] + basis, es1 = nums[nums.length - 1] + basis;
-          const esRange = `${Number.isInteger(es0) ? es0 : es0.toFixed(0)}～${Number.isInteger(es1) ? es1 : es1.toFixed(0)}`;
-          const spxRange = `${nums[0]}～${nums[nums.length - 1]}`;
-          if (showES) {
-            return `<span>${cleanMain}</span> <span style="font-size:12px; color:var(--text-muted); font-weight:600;">(SPX ${spxRange})</span>`;
-          }
-          return `<span>${cleanMain}</span> <span style="font-size:12px; color:var(--pin-gold); background:var(--pin-gold-bg); padding:1px 6px; border-radius:4px; font-weight:700;">ES ${esRange}</span>`;
+          return `<span>${cleanMain}</span>`;
         } else if (nums.length === 1) {
           return fmtDual(nums[0]);
         }
@@ -1570,7 +1576,17 @@ function renderDashboard() {
   document.getElementById('disp-date').textContent = `${SNAPSHOT.date} #${String(SNAPSHOT.seq).padStart(3, '0')}`;
   document.getElementById('disp-spot').textContent = currentSpot.toFixed(2);
   document.getElementById('disp-es').textContent = (currentSpot + basis).toFixed(2);
-  document.getElementById('report-timestamp').textContent = `更新於 ${SNAPSHOT.updated_at}`;
+  const pillSpot = document.getElementById('pill-spot');
+  const pillEs = document.getElementById('pill-es');
+  if (pillSpot) pillSpot.style.display = showES ? 'none' : '';
+  if (pillEs) pillEs.style.display = showES ? '' : 'none';
+  const _gx1 = document.getElementById('guide-ex-strike');
+  const _gx2 = document.getElementById('guide-ex-strike2');
+  if (_gx1) _gx1.textContent = fmtLvl(7650);
+  if (_gx2) _gx2.textContent = fmtLvl(7650);
+  const _tsRaw = String(SNAPSHOT.updated_at || '');
+  const _tsFmt = showES ? _tsRaw.replace(/SPX\s*([\d,.]+)/g, (m, p) => 'ES ' + (parseFloat(p.replace(/,/g, '')) + basis).toFixed(2)) : _tsRaw;
+  document.getElementById('report-timestamp').textContent = `更新於 ${_tsFmt}`;
 
   const flipStrike = SNAPSHOT.key_levels.gamma_flip;
   const callWall = SNAPSHOT.key_levels.call_wall;
@@ -1580,14 +1596,11 @@ function renderDashboard() {
   const isDealerLong = SNAPSHOT.key_levels.call_wall_dealer_long;
 
   const setCardLevel = (mainId, subId, spxStrike) => {
-    const esVal = Number.isInteger(spxStrike + basis) ? (spxStrike + basis) : (spxStrike + basis).toFixed(1);
-    if (showES) {
-      document.getElementById(mainId).textContent = 'ES ' + esVal;
-      document.getElementById(subId).textContent = 'SPX ' + spxStrike;
-    } else {
-      document.getElementById(mainId).textContent = spxStrike;
-      document.getElementById(subId).textContent = 'ES ' + esVal;
-    }
+    const raw = spxStrike + basis;
+    const esVal = Number.isInteger(raw) ? String(raw) : raw.toFixed(1);
+    document.getElementById(mainId).textContent = showES ? ('ES ' + esVal) : String(spxStrike);
+    const sub = document.getElementById(subId);
+    if (sub) { sub.textContent = ''; sub.style.display = 'none'; }
   };
 
   setCardLevel('lvl-flip', 'lvl-flip-es', flipStrike);
@@ -1634,46 +1647,43 @@ function renderDashboard() {
   const minIVRow = SNAPSHOT.key_levels.min_iv_row;
 
   let ivHtml = `<ul>`;
-  ivHtml += `<li><strong>現價價平 (${atmRow.strike}) IV 為 <span class="highlight-cyan">${fmtIV(atmRow.iv)}%</span>，全表最低 IV 落在 <span class="highlight-cyan">${minIVRow.strike} (${fmtIV(minIVRow.iv)}%)</span></strong>。</li>`;
+  ivHtml += `<li><strong>現價價平 (${fmtLvl(atmRow.strike)}) IV 為 <span class="highlight-cyan">${fmtIV(atmRow.iv)}%</span>，全表最低 IV 落在 <span class="highlight-cyan">${fmtLvl(minIVRow.strike)} (${fmtIV(minIVRow.iv)}%)</span></strong>。</li>`;
   if (isDealerLong) {
-    ivHtml += `<li><span class="highlight-green">✅ 確認上方 Call Wall (${callWall.strike} / ES ${(callWall.strike+basis).toFixed(0)}) 為「造市商真買方（Long Gamma）」</span>：該履約價累積高達 <strong>${callWall.cvol.toLocaleString()} 口 Call</strong>，但 IV 被壓低至 <strong>${fmtIV(callWall.iv)}%</strong>（低於價平之 ${fmtIV(atmRow.iv)}%），證明市場大戶是在「主動倒貨賣出 Call（Overwriting）」給造市商。</li>`;
-    ivHtml += `<li><strong>實戰意義</strong>：當 SPX 靠近 <span class="highlight-green">${callWall.strike - 5} ～ ${callWall.strike + 5}</span>（ES <span class="highlight-gold">${(callWall.strike - 5 + basis).toFixed(0)} ～ ${(callWall.strike + 5 + basis).toFixed(0)}</span>）時，造市商會機械式拋售 ES 期貨對沖，屬於<strong>高勝率真鐵板阻力，無軋空風險</strong>。</li>`;
+    ivHtml += `<li><span class="highlight-green">✅ 確認上方 Call Wall (${fmtLvl(callWall.strike)}) 為「造市商真買方（Long Gamma）」</span>：該履約價累積高達 <strong>${callWall.cvol.toLocaleString()} 口 Call</strong>，但 IV 被壓低至 <strong>${fmtIV(callWall.iv)}%</strong>（低於價平之 ${fmtIV(atmRow.iv)}%），證明市場大戶是在「主動倒貨賣出 Call（Overwriting）」給造市商。</li>`;
+    ivHtml += `<li><strong>實戰意義</strong>：當價格靠近 <span class="highlight-green">${fmtLvl(callWall.strike - 5)} ～ ${fmtLvl(callWall.strike + 5)}</span>時，造市商會機械式拋售 ES 期貨對沖，屬於<strong>高勝率真鐵板阻力，無軋空風險</strong>。</li>`;
   } else {
-    ivHtml += `<li><span class="highlight-red">🚨 警告！上方最大量 Call (${callWall.strike} / ES ${(callWall.strike+basis).toFixed(0)}) 出現「買方搶購特徵（Short Gamma 軋空風險）」</span>：該處成交 <strong>${callWall.cvol.toLocaleString()} 口 Call</strong>，且 IV 高達 <strong>${fmtIV(callWall.iv)}%</strong>，顯示主動買盤湧入，造市商被迫當賣方！一旦突破將引發追買助漲，切勿逆勢摸頂！</li>`;
+    ivHtml += `<li><span class="highlight-red">🚨 警告！上方最大量 Call (${fmtLvl(callWall.strike)}) 出現「買方搶購特徵（Short Gamma 軋空風險）」</span>：該處成交 <strong>${callWall.cvol.toLocaleString()} 口 Call</strong>，且 IV 高達 <strong>${fmtIV(callWall.iv)}%</strong>，顯示主動買盤湧入，造市商被迫當賣方！一旦突破將引發追買助漲，切勿逆勢摸頂！</li>`;
   }
   ivHtml += `</ul>`;
   document.getElementById('dynamic-iv-content').innerHTML = ivHtml;
 
+  const autoES = (str) => str.replace(/\b(7,?\d{3}(?:\.\d+)?)\b/g, (m, numStr) => {
+    const val = parseFloat(numStr.replace(/,/g, ''));
+    if (val < 7000 || val > 9000) return m;
+    const esVal = val + basis;
+    return Number.isInteger(esVal) ? String(esVal) : esVal.toFixed(numStr.includes('.') ? 2 : 1);
+  });
   const decorateESInHtml = (rawHtml) => {
     if (!rawHtml) return '';
     if (!showES) return rawHtml;
-    return rawHtml.replace(/<code>([^<]+)<\/code>/g, (match, inner) => {
-      if (inner.includes('ES') || inner.includes('#') || inner.includes('%') || inner.includes('$')) return match;
-      const replaced = inner.replace(/\b(7\d{3}(?:\.\d+)?)\b/g, (m, numStr) => {
-        const val = parseFloat(numStr);
-        if (val < 7000 || val > 8500) return m;
-        const esVal = val + basis;
-        const esFmt = Number.isInteger(esVal) ? String(esVal) : esVal.toFixed(numStr.includes('.') ? 2 : 1);
-        return `${numStr} [ES ${esFmt}]`;
-      });
-      return `<code>${replaced}</code>`;
-    });
+    // 只處理標籤之間的文字節點，避免破壞 style 屬性
+    return rawHtml.replace(/>([^<>]+)</g, (m, text) => '>' + autoES(text) + '<');
   };
 
   const pbTag = document.getElementById('playbook-es-tag');
   if (pbTag) {
     pbTag.textContent = showES
-      ? `🎯 已開啟 ES 期貨點位自動換算 (Basis +${basis.toFixed(2)})`
-      : `SPX 點位 (點擊上方「對應 ES」可自動換算全文點位)`;
+      ? `🎯 全文顯示：ES 期貨點位 (SPX + ${basis.toFixed(2)})`
+      : `📊 全文顯示：SPX 現貨點位`;
   }
 
   let pbHtml = `<div style="background:var(--bg-card); border:1px solid var(--border); border-radius:6px; padding:8px 12px; margin-bottom:10px; font-size:12px;">`;
-  pbHtml += `<strong>📍 即時雙軌關鍵點位（Basis +${basis.toFixed(2)}）</strong>：`;
-  pbHtml += `現價 <code>SPX ${currentSpot.toFixed(2)} / ES ${(currentSpot+basis).toFixed(2)}</code> ｜ `;
-  pbHtml += `Flip <span class="highlight-gold">${flipStrike} (ES ${(flipStrike+basis).toFixed(0)})</span> ｜ `;
-  pbHtml += `磁吸王 <span class="highlight-gold">${kingPin.strike} (ES ${(kingPin.strike+basis).toFixed(0)})</span> ｜ `;
-  pbHtml += `上方 Call 牆 <span class="highlight-green">${callWall.strike} (ES ${(callWall.strike+basis).toFixed(0)})</span> ｜ `;
-  pbHtml += `下方 Put 牆 <span class="highlight-red">${putTrigger.strike} (ES ${(putTrigger.strike+basis).toFixed(0)})</span>`;
+  pbHtml += `<strong>📍 即時關鍵點位（${showES ? 'ES 期貨' : 'SPX 現貨'}）</strong>：`;
+  pbHtml += `現價 <code>${showES ? fmtLvl(currentSpot, 2) : currentSpot.toFixed(2)}</code> ｜ `;
+  pbHtml += `Flip <span class="highlight-gold">${fmtLvl(flipStrike)}</span> ｜ `;
+  pbHtml += `磁吸王 <span class="highlight-gold">${fmtLvl(kingPin.strike)}</span> ｜ `;
+  pbHtml += `上方 Call 牆 <span class="highlight-green">${fmtLvl(callWall.strike)}</span> ｜ `;
+  pbHtml += `下方 Put 牆 <span class="highlight-red">${fmtLvl(putTrigger.strike)}</span>`;
   pbHtml += `</div>`;
 
   if (SNAPSHOT.playbook_html) {
@@ -1681,15 +1691,15 @@ function renderDashboard() {
   } else {
     pbHtml += `<ul>`;
     if (currentSpot < flipStrike) {
-      pbHtml += `<li><strong>📍 當前戰場定位</strong>：SPX 現價 <code>${currentSpot.toFixed(2)}</code>（ES <code>${(currentSpot+basis).toFixed(2)}</code>）位於分水嶺 <span class="highlight-gold">${flipStrike} (ES ${(flipStrike+basis).toFixed(0)})</span> 之下，處於<strong>負 Gamma 雙向加速口袋</strong>，盤中波動放大。</li>`;
-      pbHtml += `<li><strong>🎯 劇本 A（主劇本）</strong>：反彈受阻於 <span class="highlight-gold">${flipStrike} (ES ${(flipStrike+basis).toFixed(0)})</span> 或上方 <span class="highlight-green">${callWall.strike} (ES ${(callWall.strike+basis).toFixed(0)})</span> 造市商賣牆，區間震盪偏空。</li>`;
-      pbHtml += `<li><strong>📉 劇本 B（次劇本：下殺加速）</strong>：一旦跌破 <span class="highlight-red">${putTrigger.strike} (ES ${(putTrigger.strike+basis).toFixed(0)})</span>，造市商負 Gamma 賣盤將觸發單邊加速下殺，直測下方隔夜 Put OI 支撐牆 <span class="highlight-cyan">${putOiWall.strike} (ES ${(putOiWall.strike+basis).toFixed(0)})</span>。</li>`;
-      pbHtml += `<li><strong>🧲 劇本 C（尾盤 Charm 回吸）</strong>：尾盤隨價外 Put 時間價值衰減，造市商買回空單，將指數拉回 <span class="highlight-gold">${kingPin.strike} (ES ${(kingPin.strike+basis).toFixed(0)})</span> 附近收盤。</li>`;
+      pbHtml += `<li><strong>📍 當前戰場定位</strong>：${showES ? 'ES 期貨' : 'SPX 現貨'} 現價 <code>${showES ? fmtLvl(currentSpot, 2) : currentSpot.toFixed(2)}</code> 位於分水嶺 <span class="highlight-gold">${fmtLvl(flipStrike)}</span> 之下，處於<strong>負 Gamma 雙向加速口袋</strong>，盤中波動放大。</li>`;
+      pbHtml += `<li><strong>🎯 劇本 A（主劇本）</strong>：反彈受阻於 <span class="highlight-gold">${fmtLvl(flipStrike)}</span> 或上方 <span class="highlight-green">${fmtLvl(callWall.strike)}</span> 造市商賣牆，區間震盪偏空。</li>`;
+      pbHtml += `<li><strong>📉 劇本 B（次劇本：下殺加速）</strong>：一旦跌破 <span class="highlight-red">${fmtLvl(putTrigger.strike)}</span>，造市商負 Gamma 賣盤將觸發單邊加速下殺，直測下方隔夜 Put OI 支撐牆 <span class="highlight-cyan">${fmtLvl(putOiWall.strike)}</span>。</li>`;
+      pbHtml += `<li><strong>🧲 劇本 C（尾盤 Charm 回吸）</strong>：尾盤隨價外 Put 時間價值衰減，造市商買回空單，將指數拉回 <span class="highlight-gold">${fmtLvl(kingPin.strike)}</span> 附近收盤。</li>`;
     } else {
-      pbHtml += `<li><strong>📍 當前戰場定位</strong>：SPX 現價 <code>${currentSpot.toFixed(2)}</code>（ES <code>${(currentSpot+basis).toFixed(2)}</code>）位於分水嶺 <span class="highlight-gold">${flipStrike} (ES ${(flipStrike+basis).toFixed(0)})</span> 之上，處於<strong>正 Gamma 減速護盤環境</strong>（造市商高賣低買）。</li>`;
-      pbHtml += `<li><strong>🎯 劇本 A（主劇本：雙向收斂釘死）</strong>：圍繞最大磁吸王 <span class="highlight-gold">${kingPin.strike} (ES ${(kingPin.strike+basis).toFixed(0)})</span> 高拋低吸，拉回 <span class="highlight-gold">${flipStrike}</span> 買方護盤、上衝 <span class="highlight-green">${callWall.strike}</span> 賣方壓制。</li>`;
-      pbHtml += `<li><strong>🚀 劇本 B（次劇本：上攻封頂）</strong>：若向上突破則在 <span class="highlight-green">${callWall.strike} (ES ${(callWall.strike+basis).toFixed(0)})</span> 遭遇造市商重兵對沖封頂。</li>`;
-      pbHtml += `<li><strong>🛡️ 劇本 C（下檔風控劇本）</strong>：唯有帶量跌破 <span class="highlight-gold">${flipStrike}</span> 與 <span class="highlight-red">${putTrigger.strike}</span> 才轉為負 Gamma 波動放大。</li>`;
+      pbHtml += `<li><strong>📍 當前戰場定位</strong>：${showES ? 'ES 期貨' : 'SPX 現貨'} 現價 <code>${showES ? fmtLvl(currentSpot, 2) : currentSpot.toFixed(2)}</code> 位於分水嶺 <span class="highlight-gold">${fmtLvl(flipStrike)}</span> 之上，處於<strong>正 Gamma 減速護盤環境</strong>（造市商高賣低買）。</li>`;
+      pbHtml += `<li><strong>🎯 劇本 A（主劇本：雙向收斂釘死）</strong>：圍繞最大磁吸王 <span class="highlight-gold">${fmtLvl(kingPin.strike)}</span> 高拋低吸，拉回 <span class="highlight-gold">${fmtLvl(flipStrike)}</span> 買方護盤、上衝 <span class="highlight-green">${fmtLvl(callWall.strike)}</span> 賣方壓制。</li>`;
+      pbHtml += `<li><strong>🚀 劇本 B（次劇本：上攻封頂）</strong>：若向上突破則在 <span class="highlight-green">${fmtLvl(callWall.strike)}</span> 遭遇造市商重兵對沖封頂。</li>`;
+      pbHtml += `<li><strong>🛡️ 劇本 C（下檔風控劇本）</strong>：唯有帶量跌破 <span class="highlight-gold">${fmtLvl(flipStrike)}</span> 與 <span class="highlight-red">${fmtLvl(putTrigger.strike)}</span> 才轉為負 Gamma 波動放大。</li>`;
     }
     pbHtml += `</ul>`;
   }
@@ -1702,7 +1712,7 @@ function renderDashboard() {
     deltaBox.innerHTML = `<p style="color:var(--text-muted); font-size:12px;">目前為 <code>${SNAPSHOT.date}</code> 當日第 1 筆基準快照。當盤中上傳第 2 筆數據後，此處將自動顯示前後兩筆的 <strong>ΔVolume 爆量攻擊點</strong> 與 <strong>ΔIV 主動買賣方向</strong>。</p>`;
   } else {
     const ds = SNAPSHOT.delta_summary;
-    deltaTag.textContent = `對比前筆 #${String(ds.prev_seq).padStart(3,'0')} (SPX ${ds.prev_spot})`;
+    deltaTag.textContent = showES ? `對比前筆 #${String(ds.prev_seq).padStart(3,'0')} (ES ${fmtLvl(Number(ds.prev_spot), 2)})` : `對比前筆 #${String(ds.prev_seq).padStart(3,'0')} (SPX ${ds.prev_spot})`;
     deltaBox.innerHTML = decorateESInHtml(ds.html_summary);
   }
 
