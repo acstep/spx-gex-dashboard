@@ -1,6 +1,6 @@
 {
   "project": "SPX / ES 3-Layer GEX Quant Dashboard",
-  "total_snapshots": 1,
+  "total_snapshots": 79,
   "latest": "data/2026-10-27/20261027_004_spot7702.31_calc.json",
   "history": [
     {
