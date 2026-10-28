@@ -1,7 +1,7 @@
 {
  "project": "SPX / ES 3-Layer GEX Quant Dashboard",
- "total_snapshots": 87,
- "latest": "data/2026-10-28/20261028_003_spot7727.18_calc.json",
+ "total_snapshots": 88,
+ "latest": "data/2026-10-28/20261028_004_spot7729.94_calc.json",
  "history": [
   {
    "date": "2026-09-01",
@@ -17,6 +17,20 @@
   }
  ],
  "snapshots": [
+  {
+   "date": "2026-10-28",
+   "seq": "004",
+   "spot": 7729.94,
+   "net_vol_vgex_b": 2.67,
+   "total_pin_vgex_b": 94.8,
+   "net_oi_gex_b": 8.76,
+   "call_wall": 7750,
+   "put_trigger": 7700,
+   "king_pin": 7725,
+   "gamma_flip": 7797.8,
+   "raw_csv": "data/2026-10-28/20261028_004_spot7729.94_raw.csv",
+   "calc_json": "data/2026-10-28/20261028_004_spot7729.94_calc.json"
+  },
   {
    "date": "2026-10-28",
    "seq": "003",
@@ -1131,5 +1145,5 @@
    "calc_json": "data/2026-10-19/20261019_005_spot7702.64_calc.json"
   }
  ],
- "updated_at": "2026-10-28T13:10:00Z"
+ "updated_at": "2026-10-28T14:20:00Z"
 }
