@@ -2,6 +2,21 @@
 
 🔗 **Live Interactive Dashboard (GitHub Pages)**: [https://acstep.github.io/spx-gex-dashboard/](https://acstep.github.io/spx-gex-dashboard/)
 
+## 🚨 每次收到「希臘字母 / 選擇權鏈」時要做什麼（先讀這份）
+
+> **觸發句**：只要使用者丟來**截圖 / CSV / Excel / 一句「跑下一筆」**，就照這份 SOP 跑完，不用重新確認。
+>
+> 📄 **[`SPX_GEX_SOP_Each_Snapshot.md`](./SPX_GEX_SOP_Each_Snapshot.md)** — 逐筆作業 SOP（15 節，含公式、增量分解判讀門檻、三大鐵律、7 個產出檔、上傳驗證 4 關、回覆固定格式、我犯過的 8 個錯）
+
+**一頁版流程**
+```
+原始鏈 → MULT_M=100×S²×0.01/1e6 → 6 總量＋5 點位＋15 點重心＋Flip(累積法)
+      → 增量分解（新成交 vs IV 重估，>60% 重估＝不可交易）
+      → 7 個檔案 → 推 GitHub → 驗 4 關 → 回覆（附更新連結）
+```
+
+---
+
 ## 📚 系統指令與量化分析 SOP 文件 (Markdown Prompts)
 
 1. 📄 **[`SPX_GEX_Full_Workflow_With_GitHub.md`](./SPX_GEX_Full_Workflow_With_GitHub.md)**  
